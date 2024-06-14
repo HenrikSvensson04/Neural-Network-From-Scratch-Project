@@ -4,7 +4,7 @@ use crate::neuron::Neuron;
 
 
 pub struct Layer{
-    neurons : Vec<Neuron>
+    pub neurons : Vec<Neuron>
 }
 
 impl Layer{
@@ -19,5 +19,9 @@ impl Layer{
             }
             
         };
+    }
+
+    pub fn get_number_of_neurons(&self) -> usize {
+        return self.neurons.len();
     }
 }

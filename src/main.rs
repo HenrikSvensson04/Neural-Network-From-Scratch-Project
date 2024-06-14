@@ -5,7 +5,7 @@
 mod neural_network;
 mod neuron;
 mod layer;
-mod Layer;
+//mod Layer;
 
 use crate::neural_network::NeuralNetwork;
 
