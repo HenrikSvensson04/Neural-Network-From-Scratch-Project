@@ -5,8 +5,8 @@ use rand::{thread_rng, Rng};
 
 
 pub struct Neuron{
-    weights : Option<Vec<f32>>, // using direct indexing to previous layer.
-    bias : Option<Vec<f32>> // using direct indexing to previous layer.
+    pub weights : Option<Vec<f32>>, // using direct indexing to previous layer.
+    pub bias : Option<Vec<f32>> // using direct indexing to previous layer.
 
 }
 
@@ -19,8 +19,6 @@ impl Neuron{
     }
 
     pub fn set_random_weights_and_bias(&mut self, number_of_neurons_previous_layer : u32){
-        let mut rng = thread_rng();
-
         // create random weights
         self.weights = Some(
             (0..number_of_neurons_previous_layer as usize).map(|redundant_i|{

@@ -17,7 +17,6 @@ impl Layer{
                     .collect();
                 neurons_vec
             }
-            
         };
     }
 
