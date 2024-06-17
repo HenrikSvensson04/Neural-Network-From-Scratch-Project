@@ -1,10 +1,10 @@
 
 
-use std::iter::zip;
+use std::iter::{zip, Sum};
 
 use crate::layer::Layer;
 use crate::backpropagation::{SquishFunction, TraningHandeler};
-use crate::neuron::Neuron;
+use crate::neuron::{self, Neuron};
 
 pub struct NeuralNetwork{
     pub hidden_layers : Vec<Layer>,
@@ -50,16 +50,54 @@ impl NeuralNetwork{
                 return self.output_layer.as_ref().unwrap().neurons.get(variable_pos.1);
             }
         } 
-
         return None;
-        
     }
 
-    pub fn calculate_values_of_all_neurons(&self) -> Vec<Vec<f32>>{
+    /// Calculate values of all neurons into a vec<vec<f32>>, with format: layer -> neuron -> value, this includes both hidden layers and output layer and input layer
+    pub fn calculate_values_of_all_neurons(&self, input : &Vec<f32>) -> Option<Vec<Vec<f32>>>{
 
+        if input.len() == self.input_layer.as_ref().unwrap().get_number_of_neurons(){
+            let mut return_vec : Vec<Vec<f32>> = Vec::new();
+            return_vec.push(input.clone()); // add input layer
+            for i in 0..self.hidden_layers.len()+1 { // Note: all hidden layers + output layer
 
-        for i in self.hidden_layers {
-            
+                let layer = {
+                    if i < self.hidden_layers.len(){
+                        self.hidden_layers.get(i).unwrap()
+                    } else {
+                        &self.output_layer.as_ref().unwrap()
+                    }
+                };
+
+                let mut layer_values = Vec::new();
+                
+                for j in 0..layer.neurons.len() {
+                    let neuron = layer.neurons.get(j).unwrap(); 
+
+                    let input_layer_values = {
+                        if i == 0{// use input layer
+                            &input
+                        } else { // use previous hidden layer as layer -- thus we use the value we calculated last iteration as input to this layer
+                            return_vec.get(i).unwrap()
+                        }
+                    };
+                    let mut neuron_value : f32 = zip(input_layer_values, neuron.weights.as_ref().unwrap()).into_iter().map(|(input_neuron_value, weight)|{
+                            println!("{} * {}, Number of neurons in previous layer: {}", input_neuron_value, weight, neuron.weights.as_ref().unwrap().len());
+                            return input_neuron_value*weight;
+                    }).sum();
+
+                    neuron_value += neuron.bias.unwrap(); // add bias
+                    layer_values.push(neuron_value);
+                }
+
+                println!("\n");
+
+                return_vec.push(layer_values);
+            }
+
+            return Some(return_vec);
+        } else {
+            return None;
         }
     }
 
@@ -96,7 +134,6 @@ impl NeuralNetwork{
                             });
                         }    
                     }
-                
             }
             return Some(self);
         } 

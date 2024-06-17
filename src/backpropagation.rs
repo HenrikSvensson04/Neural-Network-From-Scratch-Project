@@ -63,7 +63,7 @@ impl TraningHandeler{
 
             // generate gradient layout
             //type local_neuron_tuple = (Vec<f32>, Vec<f32>);           // layer -> neuron -> (weights, bias)per neuron
-            let mut gradient : Vec<Vec<local_neuron_tuple>> = Vec::new(); // layer -> neuron -> (weights, bias), per neuron
+            let mut gradient : Vec<Vec<local_neuron_tuple>> = Vec::new(); // layer -> neuron -> (weights, bias), per neuron, where layer = 0 is first hidden layer
 
             // for input layer - unneccesary???
             //gradient.push(self.initalize_gradient_for_layer(&neural_network.input_layer.as_ref().unwrap()));
@@ -110,17 +110,23 @@ impl TraningHandeler{
     /// calculate partial derivatives relative to all weights and bias of each neuron
     pub fn calculate_gradient(&self, gradient : &Vec<Vec<local_neuron_tuple>>, neural_network : &NeuralNetwork) -> Vec<Vec<local_neuron_tuple>>{
 
-        // calculate derivatives to weights
+
+        // calculate all values of neurons in network
+        let neuron_values = neural_network.calculate_values_of_all_neurons(self.traning_data_input.get(0).unwrap()).unwrap();
+
+        let correct_value_y = 10.0;
+
+        // calculate derivatives to weights and bias
         for i in 0..gradient.len(){
             let layer = gradient.get(i).unwrap();
             for j in 0..layer.len(){
                 let neuron_weights_biases = layer.get(j).unwrap();
                 for k in 0..neuron_weights_biases.0.len(){ // Note: becuse num weights = num biases
                     
-                    let weight_pos = (i, j, k, 0 as usize); // layer, neuron, connection/edge, weight or bias
+                    let weight_pos = (i, j, k, 0 as usize); // Where: layer, neuron, connection/edge, weight or bias(0 == weight, 1 == bias)
                     let bias_pos = (i, j, k, 1 as usize);
 
-                    let weight_partial = self.calculate_partial_derivative(weight_pos, &neural_network);
+                    let weight_partial = self.calculate_partial_derivative(correct_value_y, weight_pos, &neural_network, &neuron_values);
     
                     
                 }
@@ -133,10 +139,20 @@ impl TraningHandeler{
         Vec::new()
     }
 
-    pub fn calculate_partial_derivative(&self, variable_pos : (usize, usize, usize, usize), neural_network : &NeuralNetwork) -> f32{
+    pub fn calculate_partial_derivative(&self, y : f32, variable_pos : (usize, usize, usize, usize), neural_network : &NeuralNetwork, neuron_values : &Vec<Vec<f32>>) -> f32{
 
+        if variable_pos.3 == 0{ // calculate partial derivative relative to weight
+            let dtopdz = self.derivative_of_z_from_top(y, variable_pos, neural_network, neuron_values);
+            let dzdw = neuron_values.get(variable_pos.0).unwrap().get(variable_pos.1).unwrap();
 
-        10.0
+            let dtopdw = dtopdz * dzdw;
+            return dtopdw;
+        } else { /*if variable_pos.3 == 1{ */ // calculate partial derivative relative to bias
+            let dtopdz = self.derivative_of_z_from_top(y, variable_pos, neural_network, neuron_values);
+            //let dzdb = /*****/
+            return 10.0;
+        }
+
     }
 
 
@@ -156,7 +172,7 @@ impl TraningHandeler{
     ///             |
     ///             z(L)
     ///       ----------------
-    ///    w1..wn   |      b1..bn
+    ///    w1..wn   |       b
     ///             a(L-1)
     ///             .
     ///       ...   .   ...
@@ -164,35 +180,28 @@ impl TraningHandeler{
     /// 
 
     /// According to chain rule
-    /// dC = dz = (dC/da(L)) * (da(L)/dz(L))
-    pub fn derivative_of_z_from_top(&self, a : f32, y : f32, variable_pos : (usize, usize, usize, usize), neural_network : &NeuralNetwork) -> f32{
+    /// dC = dz = (dC/da(L)) * (da(L)/dz(L))                
+    pub fn derivative_of_z_from_top(&self, y : f32, variable_pos : (usize, usize, usize, usize), neural_network : &NeuralNetwork, neuron_values : &Vec<Vec<f32>>) -> f32{
 
+        let a /*neuron a(L), the neuron we are at*/ : f32 = neuron_values.get(variable_pos.0+1).unwrap().get(variable_pos.1 +1).unwrap().clone();
         // First this: dt/da(L)
         let dtda = 2.0 * (a-y);
-
 
         // where a = a(L) = sigmoid(z(L))
         // where z(L) = w1*a(L-1) + .... + wn*a(L-1) + b1*a(L-1) + .... + bn*a(L-1)
         // calculate z
         let neuron = neural_network.get_neuron_from_position(variable_pos).unwrap();
-        let sum_w = {
 
-            // calculate: w1*a(L-1) + .... + wn*a(L-1) + b1*a(L-1) + .... + bn*a(L-1)
-            let mut sum = 0;
-            for i in 0..neuron.weights.as_ref().unwrap().len() {
-                //let corresponding_neuron_value = neural_network.get_neuron_from_position(variable_pos)
-                //sum = 
-            }
-            neural_network.get_neuron_from_position(variable_pos).unwrap().weights.unwrap().into_iter()
+        // calculate: w1*a(L-1) + .... + wn*a(L-1) + b
+        let neuron_values_previous_layer_iterator = neuron_values.get(variable_pos.0).unwrap();
+        let sum_weights : f32= zip(neuron_values_previous_layer_iterator, neuron.weights.as_ref().unwrap())
+            .into_iter()
+            .map(|(neuron_value, weight)|{
+                neuron_value * weight
+            }).sum(); // = w1*a(L-1) + .... + wn*a(L-1)
         
-        };
-
-        let z = sum_w + neuron.bias;
+        let z = sum_weights + neuron.bias.unwrap(); // calculate: z(L) = w1*a(L-1) + .... + wn*a(L-1) + b
         let dadz = self.derivative_of_sigmoid(z);
-
         return dtda * dadz;
-
     }
-
-
 }
