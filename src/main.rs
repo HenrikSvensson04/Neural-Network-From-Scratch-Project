@@ -96,6 +96,16 @@ mod tests {
 
             // calculate values of all neurons in network
             let neuron_values = nw.calculate_values_of_all_neurons(&input).unwrap();
+
+            let mut traning_handeler = TraningHandeler::new(SquishFunction::sigmoid, &mut nw);
+
+            // I1 -> n11 
+            // I2 -> n12 -> n21
+            //    -> n13
+            // let's calculate dn11/dw1
+            //let dn11dw = traning_handeler.calculate_partial_derivative(10.0, (1, 1, 1, 0), &nw, &neuron_values);
+            // should be = 2 * (A(L) - y)
+            
             
 
 

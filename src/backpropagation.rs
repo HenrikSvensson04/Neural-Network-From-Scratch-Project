@@ -1,9 +1,16 @@
-use std::{iter::zip};
+use std::{collections::HashMap, iter::zip};
 
 use crate::{backpropagation, layer::Layer, neural_network::{self, NeuralNetwork}};
 
 
-type local_neuron_tuple = (Vec<f32>, Vec<f32>);
+type local_neuron_tuple = (Vec<f32>, f32); // 
+
+type PartialPosition = (i32, i32, i32, i32); 
+// layer -> associated neuron -> type variable(C - cost function, weight, bias, neuron value A(L), inside sigmoid Z(L)) -> (if weight) specify weight
+
+type PartialDerivative= (PartialPosition /* Position of variable a */, PartialPosition /* Position of variable b */); 
+// Here we describe the partial deriativtive (da/sb) in relation to the graph tree of all variables
+// Thus: Partial derivative from two nodes in the graph (da/db), determained by partial position
 
 pub enum SquishFunction{
     sigmoid
@@ -62,8 +69,8 @@ impl TraningHandeler{
             //self.traning_data_input
 
             // generate gradient layout
-            //type local_neuron_tuple = (Vec<f32>, Vec<f32>);           // layer -> neuron -> (weights, bias)per neuron
-            let mut gradient : Vec<Vec<local_neuron_tuple>> = Vec::new(); // layer -> neuron -> (weights, bias), per neuron, where layer = 0 is first hidden layer
+            //type local_neuron_tuple = (Vec<f32>, f32);
+            let mut gradient : Vec<Vec<local_neuron_tuple>> = Vec::new(); // layer -> neuron -> (vec weights, bias), per neuron, where layer = 0 is first hidden layer
 
             // for input layer - unneccesary???
             //gradient.push(self.initalize_gradient_for_layer(&neural_network.input_layer.as_ref().unwrap()));
@@ -92,21 +99,99 @@ impl TraningHandeler{
 
     pub fn initalize_gradient_for_layer(&self, layer : &Layer)-> Vec<local_neuron_tuple>{
         return layer.neurons.iter().map(|neuron|{
-            /* 
-            let tuple = zip(neuron.weights, neuron.bias).map(|(weights, bias)|{
-                return 
-            })
-            */
-            let mut tuple : local_neuron_tuple = (Vec::new(), Vec::new());
+            let mut tuple : local_neuron_tuple = (Vec::new(), 1.0);
             for i in 0..neuron.weights.as_ref().unwrap().len(){
-                tuple.0.push(-1.0);
-                tuple.1.push(-1.0);
+                tuple.0.push(1.0);
             }
 
             return tuple;
         }).collect();
     }
 
+
+    pub fn calculate_gradient(&self, gradient : &Vec<Vec<local_neuron_tuple>>, neural_network : &NeuralNetwork) -> Vec<Vec<local_neuron_tuple>>{
+
+
+        // calculate all values of neurons in network
+        let neuron_values = neural_network.calculate_values_of_all_neurons(self.traning_data_input.get(0).unwrap()).unwrap();
+        let correct_value_y = 10.0;
+        /* 
+        type PartialPosition = (i32, i32, i32, i32); 
+        // layer -> associated neuron -> type variable(C - cost function, weight, bias, neuron value A(L), inside sigmoid Z(L)) -> (if weight) specify weight
+
+        type PartialDerivative= (PartialPosition /* Position of variable a */, PartialPosition /* Position of variable b */); 
+        // Here we describe the partial deriativtive (da/sb) in relation to the graph tree of all variables
+        // Thus: Partial derivative from two nodes in the graph (da/db), determained by partial position
+        */
+
+        // lookup for all partial derivatives
+        let mut lookup_partial_derivatives : HashMap<Option<f32>, PartialDerivative> = HashMap::new();
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // calculate partial derivatives to weights and bias
+        for i in 0..gradient.len(){ // go through gradient
+            let layer = gradient.get(i).unwrap();
+
+            for j in 0..layer.len(){ // iterate through neurons
+                let neuron_weights_bias = layer.get(j).unwrap();
+
+                // Calculate partials relative to weights
+                for k in 0..neuron_weights_bias.0.len(){ 
+
+                    // Define start varible as cost function C
+                    let partial_start_pos : PartialPosition = (gradient.len() as i32, -1, 0, 0);
+                    let partial_end_pos : PartialPosition = (i as i32, j as i32, 1, k as i32); // at layer i, at neuron j, weight, weight k
+
+                    let partial_derivative = calculate_partial_derivative(partial_start_pos, partial_end_pos);
+
+                }
+
+
+                // Calculate partials relative to bias
+
+
+            }
+        }
+        // calculate derivatives to weights
+
+        Vec::new()
+    }
+
+    pub fn calculate_partial_derivative(partial_start_pos : PartialPosition, partial_end_pos : PartialPosition, lookup_partial_derivatives : &mut HashMap<Option<f32>, PartialDerivative>) -> f32{
+
+        match partial_start_pos.1{
+            -1 => { // start at top C - cost function
+                                                                                // select neurons 0..10
+                let new_partial_pos = (partial_start_pos.0, 0..10, 3, 0);
+
+            }, 
+            0 => {
+
+            },
+            _=> {
+
+            }
+        }
+        
+
+        10
+    }
+
+
+
+    /*
     /// calculate partial derivatives relative to all weights and bias of each neuron
     pub fn calculate_gradient(&self, gradient : &Vec<Vec<local_neuron_tuple>>, neural_network : &NeuralNetwork) -> Vec<Vec<local_neuron_tuple>>{
 
@@ -125,8 +210,10 @@ impl TraningHandeler{
                     
                     let weight_pos = (i, j, k, 0 as usize); // Where: layer, neuron, connection/edge, weight or bias(0 == weight, 1 == bias)
                     let bias_pos = (i, j, k, 1 as usize);
+                    //let current_pos = (gradient.len(), )                    
 
-                    let weight_partial = self.calculate_partial_derivative(correct_value_y, weight_pos, &neural_network, &neuron_values);
+
+                    let weight_partial = self.calculate_partial_derivative(correct_value_y, weight_pos, , &neural_network, &neuron_values);
     
                     
                 }
@@ -139,7 +226,7 @@ impl TraningHandeler{
         Vec::new()
     }
 
-    pub fn calculate_partial_derivative(&self, y : f32, variable_pos : (usize, usize, usize, usize), neural_network : &NeuralNetwork, neuron_values : &Vec<Vec<f32>>) -> f32{
+    pub fn calculate_partial_derivative(&self, y : f32, variable_pos : (usize, usize, usize, usize), current_pos : (usize, usize, usize, usize), neural_network : &NeuralNetwork, neuron_values : &Vec<Vec<f32>>) -> f32{
 
         if variable_pos.3 == 0{ // calculate partial derivative relative to weight
             let dtopdz = self.derivative_of_z_from_top(y, variable_pos, neural_network, neuron_values);
@@ -204,4 +291,6 @@ impl TraningHandeler{
         let dadz = self.derivative_of_sigmoid(z);
         return dtda * dadz;
     }
+
+    */
 }
