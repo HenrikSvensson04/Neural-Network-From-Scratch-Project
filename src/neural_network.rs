@@ -6,6 +6,7 @@ use std::iter::{zip, Sum};
 use crate::layer::Layer;
 use crate::backpropagation::{SquishFunction, TraningHandeler};
 use crate::neuron::{self, Neuron};
+use crate::util;
 
 pub struct NeuralNetwork{
     pub hidden_layers : Vec<Layer>,
@@ -56,6 +57,9 @@ impl NeuralNetwork{
         return None;
     }
 
+
+
+
     /// Calculate values of all neurons into a vec<vec<f32>>, with format: layer -> neuron -> value, this includes both hidden layers and output layer and input layer
     pub fn calculate_values_of_all_neurons(&self, input : &Vec<f32>) -> Option<Vec<Vec<f32>>>{
 
@@ -90,6 +94,9 @@ impl NeuralNetwork{
                     }).sum();
 
                     neuron_value += neuron.bias.unwrap(); // add bias
+                    neuron_value = util::sigmoid(neuron_value);
+
+                    
                     layer_values.push(neuron_value);
                 }
 
@@ -145,6 +152,8 @@ impl NeuralNetwork{
                     }).sum();
 
                     neuron_value += neuron.bias.unwrap(); // add bias
+                    neuron_value = util::sigmoid(neuron_value);
+                    
                     layer_values.push(neuron_value);
                     return_map.insert(&neuron, neuron_value);
                 }
@@ -170,6 +179,21 @@ impl NeuralNetwork{
             for i in 0..self.hidden_layers.len()+1{
                 let size = number_of_hidden_layers;
                     match i {
+                        _size if _size == size => {  // create connections from output layer
+
+                            let previous_layer_number_of_neurons = match size {
+                                0 => { // this is the case if there are no hidden layers
+                                    self.input_layer.as_ref().unwrap().get_number_of_neurons()
+                                }, 
+                                _=> {
+                                    self.hidden_layers.get(i-1).unwrap().get_number_of_neurons()
+                                }
+                            };
+                            let output_layer = self.output_layer.as_mut().unwrap();
+                            output_layer.neurons.iter_mut().for_each(|neuron|{
+                                neuron.set_random_weights_and_bias(previous_layer_number_of_neurons as u32);
+                            });
+                        }, 
                         0 => { // create connections to the input layer
                             let previous_layer_number_of_neurons = self.input_layer.as_mut().unwrap().get_number_of_neurons();
                             let current_layer = self.hidden_layers.get_mut(i).unwrap();
@@ -177,13 +201,7 @@ impl NeuralNetwork{
                                 neuron.set_random_weights_and_bias(previous_layer_number_of_neurons as u32);
                             });   
                         }, 
-                        _size if _size == size => {  // create connections from output layer
-                            let previous_layer_number_of_neurons = self.hidden_layers.get(i-1).unwrap().get_number_of_neurons();
-                            let output_layer = self.output_layer.as_mut().unwrap();
-                            output_layer.neurons.iter_mut().for_each(|neuron|{
-                                neuron.set_random_weights_and_bias(previous_layer_number_of_neurons as u32);
-                            });
-                        }, 
+                        
                         _=> { // create connections between hidden layers
                             let previous_layer_number_of_neurons = self.hidden_layers.get(i-1).unwrap().get_number_of_neurons();
                             let current_layer = self.hidden_layers.get_mut(i).unwrap();
@@ -202,7 +220,10 @@ impl NeuralNetwork{
     pub fn get_preceding_layer(&self, layer : &Layer) -> Option<&Layer>{ // return None if layer is the input layer
 
         if &*layer == self.output_layer.as_ref().unwrap(){
-            return Some(self.hidden_layers.last().unwrap());
+            match self.hidden_layers.len(){
+                0 => {Some(self.input_layer.as_ref().unwrap())}, 
+                _=> { Some(&self.hidden_layers.last().unwrap())}
+            }
         } else if &*layer == self.input_layer.as_ref().unwrap(){
             None
         } else {

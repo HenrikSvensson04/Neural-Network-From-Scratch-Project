@@ -7,8 +7,9 @@ mod neuron;
 mod layer;
 mod backpropagation;
 mod back;
-mod Layer;
-mod Neuron;
+mod util;
+//mod Layer;
+//mod Neuron;
 //mod Layer;
 
 use backpropagation::{SquishFunction, TraningHandeler};
@@ -21,8 +22,12 @@ fn main() {
     
     let mut nw = NeuralNetwork::builder()
         .with_input_layer(1)
-        .with_hidden_layer(1)
-        //.with_hidden_layer(2)
+        .with_hidden_layer(200)
+        .with_hidden_layer(2)
+        .with_hidden_layer(2)
+        .with_hidden_layer(20)
+        .with_hidden_layer(20)
+        .with_hidden_layer(20)
         .with_output_layer(1)
         .build_network().unwrap();
 
@@ -110,11 +115,6 @@ mod tests {
             // let's calculate dn11/dw1
             //let dn11dw = traning_handeler.calculate_partial_derivative(10.0, (1, 1, 1, 0), &nw, &neuron_values);
             // should be = 2 * (A(L) - y)
-            
-            
-
-
-
     }
 
     
@@ -185,6 +185,64 @@ mod tests {
             assert_eq!(neuron_values.get(n21).unwrap().clone(), 32.0 as f32); // Thus n21 = 32
 
     }
+
+
+    #[test]
+    /// Test gradient where the network consists of only: one input neuron and output neuron
+    fn simple_gradient_test(){
+        
+        let mut neural_network = NeuralNetwork::builder()
+        .with_input_layer(1)
+        .with_output_layer(1)
+        .build_network().unwrap();
+
+        // change weights to 10.0 and bias to 5.0
+        {
+            //output
+            neural_network.output_layer.as_mut().unwrap().neurons.iter_mut().for_each(|neuron|{
+                neuron.weights = Some(vec![10.0; 1 as usize]);
+                neuron.bias = Some(5.0);
+            });
+        }
+
+        let correct_output = vec![1.0]; // NOTICE: y = 1.0
+        let input = vec![0.5]; // 
+
+
+        println!("{:?}", neural_network.calculate_values_of_all_neurons(&input));
+
+
+        // Thus we have network
+        //
+        // a(L-1) -> a(L), where: a(L) = Sigmoid(w * a(L-1) + b) = Sigmoid(10.0 * a(L-1) + 5.0)
+        //
+        // Thus: a(L) = Sigmoid(10 * 0.5 + 5) = Sigmoid(10) = 0.9999546
+        //
+        // Where Cost C = (a(L) - y)^2
+        //
+        // Thus: dC/da(L) = 2 * (a(L) - y) = 2 * (sigmoid(10) - 1.0) = -0.0000454 * 2 = -0.00009079999 = a
+        //
+        // Thus: da(L)/dz(L) = derivative_sigmoid(z(L)) = deriva.._sigmoid(10) = 0.0000453958077 = b
+        //
+        // Thus: dz(L)/dw = a(L-1) = y = 1.0 = c
+        //
+        //
+        // As a result: dC/dw = a * b * c = -0.00009079999 * 0.0000453958077 * 1.0  = -0.0000000041219 = "Almost" = -0.0000000041255337
+
+        let gradient = back::backpropagate_weights_bias(&correct_output, &input, &neural_network);
+
+        let gradient_weight_partial = gradient.get(neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap()).as_ref().unwrap().0.get(0).as_ref().unwrap().clone().clone();
+        assert_eq!(-0.0000000041255337, gradient_weight_partial);
+    }
+}
+
+
+#[test]
+fn sigmoid(){
+    assert_eq!(util::sigmoid(2.0), 0.880797);
+    assert_eq!(util::sigmoid(0.0), 0.5);
+
+    assert_eq!(util::derivative_of_sigmoid(10.0), 0.00004539582);
 }
 
 

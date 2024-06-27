@@ -1,6 +1,6 @@
 use std::{collections::HashMap, iter::{zip, Map}};
 
-use crate::{layer::{self, Layer}, neural_network::{self, NeuralNetwork}, neuron::Neuron};
+use crate::{layer::{self, Layer}, neural_network::{self, NeuralNetwork}, neuron::Neuron, util};
 
 type Gradient = (Vec<f32>, f32);
 
@@ -83,11 +83,6 @@ pub fn backpropagate_weights_bias(correct_output_values : &Vec<f32>, input_to_ne
     return gradient;
 }
 
-pub fn derivative_of_sigmoid(input_value : f32) -> f32{
-    let e_power_negative_x = f32::powf(std::f32::consts::E, input_value);
-    return e_power_negative_x / f32::powf(1.0 + e_power_negative_x, 2.0);
-}
-
 
 fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, variable_tree_destination : &VariableTreePosition, neural_network : &NeuralNetwork, neurons_values : &HashMap<&Neuron, f32>, correct_output_values : &Vec<f32>) -> f32{
         // 
@@ -108,8 +103,9 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
         //       ...   .   ...
         // 
 
+    // check if we should calculate derivative relative to C or a neuron
     if variable_tree_start.neuron.is_some(){
-        // Now we do not start at the top!
+        // Now we do not start at the top! Thus not at C variable
 
         // check if we should continue deeper in variable tree
         if variable_tree_start.layer.is_some() && variable_tree_start.layer == variable_tree_destination.layer{
@@ -186,7 +182,12 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
         let derivative : f32 = zip(output_layer.neurons.iter(), correct_output_values).map(|(neuron, correct_value)|{
 
             let dCdA = 2.0 * (neurons_values.get(neuron).unwrap() - correct_value); 
-            let dAdZ = derivative_of_sigmoid(neurons_values.get(neuron).unwrap().clone());
+            println!("dCdA: {}", dCdA);
+            // because we want what is inside the sigmoid : Thus z(L), use the inverse sigmoid
+            let z = util::inverse_sigmoid(neurons_values.get(neuron).unwrap().clone());
+            let dAdZ = util::derivative_of_sigmoid(z);
+            println!("Z(L): {}", z);
+            println!("dAdZ: {}", dAdZ);
 
             // create new position for next iteration in the variable tree, Thus walk down one step
             let new_variable_tree_start = 
