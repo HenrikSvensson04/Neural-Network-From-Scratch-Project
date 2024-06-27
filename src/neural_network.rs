@@ -1,5 +1,6 @@
 
 
+use std::collections::HashMap;
 use std::iter::{zip, Sum};
 
 use crate::layer::Layer;
@@ -10,6 +11,7 @@ pub struct NeuralNetwork{
     pub hidden_layers : Vec<Layer>,
     pub input_layer : Option<Layer>,
     pub output_layer : Option<Layer>,
+    id_neuron_count : u32
 }
 
 impl NeuralNetwork{
@@ -18,24 +20,25 @@ impl NeuralNetwork{
             hidden_layers: Vec::new(), 
             input_layer: None,
             output_layer: None,
+            id_neuron_count : 0
         }
     }
 
     /// add hidden layer
     pub fn with_hidden_layer(mut self, number_of_neurons : u32) -> Self{
-        self.hidden_layers.push(Layer::new(number_of_neurons));
+        self.hidden_layers.push(Layer::new(number_of_neurons, &mut self.id_neuron_count));
         self
     }
 
     /// add input layer
     pub fn with_input_layer(mut self, number_of_neurons : u32) -> Self{
-        self.input_layer.insert(Layer::new(number_of_neurons));
+        self.input_layer.insert(Layer::new(number_of_neurons, &mut self.id_neuron_count));
         self
     }
 
     /// add output layer
     pub fn with_output_layer(mut self, number_of_neurons : u32) -> Self{
-        self.output_layer.insert(Layer::new(number_of_neurons));
+        self.output_layer.insert(Layer::new(number_of_neurons, &mut self.id_neuron_count));
         self
     }
 
@@ -101,6 +104,61 @@ impl NeuralNetwork{
         }
     }
 
+    /// Calculate values of all neurons into a vec<vec<f32>>, with format: layer -> neuron -> value, this includes both hidden layers and output layer and input layer
+    pub fn calculate_values_of_all_neurons_map(&self, input : &Vec<f32>) -> Option<HashMap<&Neuron, f32>>{
+
+        if input.len() == self.input_layer.as_ref().unwrap().get_number_of_neurons(){
+            let mut return_map : HashMap<&Neuron, f32> = HashMap::new();
+            let mut return_vec : Vec<Vec<f32>> = Vec::new();
+            return_vec.push(input.clone()); // add input layer
+
+            // add input layer
+            for i in 0..input.len(){
+                return_map.insert(self.input_layer.as_ref().unwrap().neurons.get(i).unwrap(), input.get(i).unwrap().clone());
+            }
+
+            for i in 0..self.hidden_layers.len()+1 { // Note: all hidden layers + output layer
+
+                let layer = {
+                    if i < self.hidden_layers.len(){
+                        self.hidden_layers.get(i).unwrap()
+                    } else {
+                        &self.output_layer.as_ref().unwrap()
+                    }
+                };
+
+                let mut layer_values = Vec::new();
+                
+                for j in 0..layer.neurons.len() {
+                    let neuron = layer.neurons.get(j).unwrap(); 
+
+                    let input_layer_values = {
+                        if i == 0{// use input layer
+                            &input
+                        } else { // use previous hidden layer as layer -- thus we use the value we calculated last iteration as input to this layer
+                            return_vec.get(i).unwrap()
+                        }
+                    };
+                    let mut neuron_value : f32 = zip(input_layer_values, neuron.weights.as_ref().unwrap()).into_iter().map(|(input_neuron_value, weight)|{
+                            println!("{} * {}, Number of neurons in previous layer: {}", input_neuron_value, weight, neuron.weights.as_ref().unwrap().len());
+                            return input_neuron_value*weight;
+                    }).sum();
+
+                    neuron_value += neuron.bias.unwrap(); // add bias
+                    layer_values.push(neuron_value);
+                    return_map.insert(&neuron, neuron_value);
+                }
+
+                println!("\n");
+                return_vec.push(layer_values);
+            }
+
+            return Some(return_map);
+        } else {
+            return None;
+        }
+    }
+
     /// Creates the network!
     /// Thus: creates all edges, verifies that there are input and output layers
     pub fn build_network(mut self) -> Option<Self>{
@@ -138,6 +196,24 @@ impl NeuralNetwork{
             return Some(self);
         } 
         return None;
+    }
+
+
+    pub fn get_preceding_layer(&self, layer : &Layer) -> Option<&Layer>{ // return None if layer is the input layer
+
+        if &*layer == self.output_layer.as_ref().unwrap(){
+            return Some(self.hidden_layers.last().unwrap());
+        } else if &*layer == self.input_layer.as_ref().unwrap(){
+            None
+        } else {
+            let pos = self.hidden_layers.iter().position(|l| *l == *layer).unwrap();
+            if pos == 0 {
+                return Some(self.input_layer.as_ref().unwrap());
+            } else {
+                return Some(self.hidden_layers.get(pos-1).unwrap());
+            }
+        }
+
     }
 }
 

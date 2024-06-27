@@ -6,6 +6,9 @@ mod neural_network;
 mod neuron;
 mod layer;
 mod backpropagation;
+mod back;
+mod Layer;
+mod Neuron;
 //mod Layer;
 
 use backpropagation::{SquishFunction, TraningHandeler};
@@ -19,19 +22,21 @@ fn main() {
     let mut nw = NeuralNetwork::builder()
         .with_input_layer(1)
         .with_hidden_layer(1)
-        .with_hidden_layer(2)
+        //.with_hidden_layer(2)
         .with_output_layer(1)
         .build_network().unwrap();
 
-    let mut traning_handeler = TraningHandeler::new(SquishFunction::sigmoid, &mut nw);
+    //let mut traning_handeler = TraningHandeler::new(SquishFunction::sigmoid, &mut nw);
     
 
-    let traning_data_input = vec![vec![1.0], vec![0.0], vec![0.5]];
-    let traning_data_correct_output = vec![vec![1.0], vec![0.0], vec![0.5]];
+    //let traning_data_input = vec![vec![1.0], vec![0.0], vec![0.5]];
+    //let traning_data_correct_output = vec![vec![1.0], vec![0.0], vec![0.5]];
 
-    traning_handeler.insert_traning_data(traning_data_input, traning_data_correct_output);
+    //traning_handeler.insert_traning_data(traning_data_input, traning_data_correct_output);
 
-    traning_handeler.backpropagate_network(&mut nw);
+    //traning_handeler.backpropagate_network(&mut nw);
+
+    back::backpropagate_weights_bias(&vec![1.0], &vec![0.5], &nw);
     
 }
 
@@ -142,7 +147,8 @@ mod tests {
             // set input neuron values
             let input = vec![2.0; number_of_neurons_input_layer as usize];
 
-            // calculate values of all neurons in network
+            //------------------------------------------------------------------
+            // TEST VECTOR VERSION: calculate values of all neurons in network
             let neuron_values = nw.calculate_values_of_all_neurons(&input).unwrap();
             // Thus we should have
             // I1 -> n11 
@@ -157,7 +163,26 @@ mod tests {
             assert_eq!(neuron_values.get(1).unwrap().get(0).unwrap().clone(), 9.0 as f32); // Thus n11 or n12 or n13 = 9
             assert_eq!(neuron_values.get(2).unwrap().get(0).unwrap().clone(), 32.0 as f32); // Thus n21 = 32
 
+            //-----------------------------------------------------------------
+            // TEST HASHMAP VERSION: calculate values of all neurons in network 
+            let neuron_values = nw.calculate_values_of_all_neurons_map(&input).unwrap();
+            // Thus we should have
+            // I1 -> n11 
+            // I2 -> n12 -> n21
+            //    -> n13
+            //
+            // where: I1 = I2 = 2.0, 
+            // n11 = n12 = n13 = I1 * 1.0 + I2 * 1.0 + 5 = 9;
+            // n21 = n12 * 1.0 + .. + n13 * 1.0 + 5 = 9 + 9 + 9 + 5 = 32
 
+            let I1 = nw.input_layer.as_ref().unwrap().neurons.get(0).unwrap();
+            assert_eq!(neuron_values.get(I1).unwrap().clone(), 2.0 as f32); // Thus input I1 = I2 = 2.0
+
+            let n11 = nw.hidden_layers.get(0).unwrap().neurons.get(0).unwrap();
+            assert_eq!(neuron_values.get(n11).unwrap().clone(), 9.0 as f32); // Thus n11 or n12 or n13 = 9
+
+            let n21 = nw.output_layer.as_ref().unwrap().neurons.get(0).unwrap();
+            assert_eq!(neuron_values.get(n21).unwrap().clone(), 32.0 as f32); // Thus n21 = 32
 
     }
 }

@@ -5,10 +5,44 @@ use crate::{backpropagation, layer::Layer, neural_network::{self, NeuralNetwork}
 
 type local_neuron_tuple = (Vec<f32>, f32); // 
 
-type PartialPosition = (i32, i32, i32, i32); 
+//type PartialPosition = (i32, i32, i32, i32); 
+
+
+
+
+#[derive(PartialEq, Clone)]
+enum TypeVariable{
+    CostFunctionTop, // Thus C = ....
+    Weight,
+    Bias, 
+    NeuronValue, // Thus a(L)
+    InsideSigmoid, // Thus z(L)
+    CorrectOutputVariable, // Thus y1, .. , yn of correct output
+}
+
+
+#[derive(Clone)]
+struct PartialPosition {
+    pub layer_index : i32,    
+    pub neuron_index : i32, 
+    pub type_of_variable : TypeVariable, // Either: C - cost function, weight, bias, neuron value A(L), inside sigmoid Z(L)
+    pub weight_index : i32
+}
+
+
+impl PartialPosition{
+    pub fn new(layer_index : i32, neuron_index : i32, type_of_variable : TypeVariable, weight_index : i32) -> PartialPosition{
+        PartialPosition{
+            layer_index,
+            neuron_index,
+            type_of_variable,
+            weight_index,
+        }
+    }
+}
 // layer -> associated neuron -> type variable(C - cost function, weight, bias, neuron value A(L), inside sigmoid Z(L)) -> (if weight) specify weight
 
-type PartialDerivative= (PartialPosition /* Position of variable a */, PartialPosition /* Position of variable b */); 
+type PartialDerivativeRelation = (PartialPosition /* Position of variable a */, PartialPosition /* Position of variable b */); 
 // Here we describe the partial deriativtive (da/sb) in relation to the graph tree of all variables
 // Thus: Partial derivative from two nodes in the graph (da/db), determained by partial position
 
@@ -119,13 +153,13 @@ impl TraningHandeler{
         type PartialPosition = (i32, i32, i32, i32); 
         // layer -> associated neuron -> type variable(C - cost function, weight, bias, neuron value A(L), inside sigmoid Z(L)) -> (if weight) specify weight
 
-        type PartialDerivative= (PartialPosition /* Position of variable a */, PartialPosition /* Position of variable b */); 
+        type PartialDerivativeRelation = (PartialPosition /* Position of variable a */, PartialPosition /* Position of variable b */); 
         // Here we describe the partial deriativtive (da/sb) in relation to the graph tree of all variables
         // Thus: Partial derivative from two nodes in the graph (da/db), determained by partial position
         */
 
         // lookup for all partial derivatives
-        let mut lookup_partial_derivatives : HashMap<Option<f32>, PartialDerivative> = HashMap::new();
+        let mut lookup_partial_derivatives : HashMap<Option<f32>, PartialDerivativeRelation> = HashMap::new(); // where type: <value, position>
 
 
 
@@ -142,7 +176,7 @@ impl TraningHandeler{
 
         // calculate partial derivatives to weights and bias
         for i in 0..gradient.len(){ // go through gradient
-            let layer = gradient.get(i).unwrap();
+            let layer = gradient.get(i).unwrap(); // neurons in layer
 
             for j in 0..layer.len(){ // iterate through neurons
                 let neuron_weights_bias = layer.get(j).unwrap();
@@ -150,11 +184,12 @@ impl TraningHandeler{
                 // Calculate partials relative to weights
                 for k in 0..neuron_weights_bias.0.len(){ 
 
-                    // Define start varible as cost function C
-                    let partial_start_pos : PartialPosition = (gradient.len() as i32, -1, 0, 0);
-                    let partial_end_pos : PartialPosition = (i as i32, j as i32, 1, k as i32); // at layer i, at neuron j, weight, weight k
+                    // Define start variable as cost function C, Thus set index to -2
+                    let partial_start_pos : PartialPosition = PartialPosition::new(-2, -2, TypeVariable::CostFunctionTop, -2); 
+                    // Define end variable
+                    let partial_end_pos : PartialPosition = PartialPosition::new(i as i32, j as i32, TypeVariable::Weight, k as i32); // at layer i, at neuron j, type of varible: (weight = 1), weight k
 
-                    let partial_derivative = calculate_partial_derivative(partial_start_pos, partial_end_pos);
+                    //let partial_derivative = self.calculate_partial_derivative(&partial_start_pos,  &partial_end_pos, partial_start_pos.clone(),&mut lookup_partial_derivatives, &neural_network);
 
                 }
 
@@ -169,24 +204,60 @@ impl TraningHandeler{
         Vec::new()
     }
 
-    pub fn calculate_partial_derivative(partial_start_pos : PartialPosition, partial_end_pos : PartialPosition, lookup_partial_derivatives : &mut HashMap<Option<f32>, PartialDerivative>) -> f32{
+    pub fn calculate_partial_derivative(&mut self, partial_start_pos : &PartialPosition, partial_end_pos : &PartialPosition, mut current_position : PartialPosition, lookup_partial_derivatives : &mut HashMap<Option<f32>, PartialDerivativeRelation>, neural_network : &NeuralNetwork) -> f32{
 
-        match partial_start_pos.1{
-            -1 => { // start at top C - cost function
-                                                                                // select neurons 0..10
-                let new_partial_pos = (partial_start_pos.0, 0..10, 3, 0);
+
+
+
+
+
+
+
+        match partial_start_pos.layer_index{
+            -2 => { // start at top C - cost function
+
+
+                // check if end_pos is a correct output varible, thus: y1, .. , yn
+                if partial_end_pos.type_of_variable == TypeVariable::CorrectOutputVariable{
+
+
+                } else {
+                    let new_partial_pos = (partial_start_pos.layer_index, 0..10, 3, 0);
+
+                }
+
+                // calculate partial derivatives relative to y1, .. , yn test correct data
+
+
+                // select neurons 0..10
+                //let new_partial_pos = (partial_start_pos.0, 0..10, 3, 0);
 
             }, 
-            0 => {
+            -1 => { // at the input layer
 
-            },
-            _=> {
+                return 1.0; // because (d/dx) * x = 1
 
+            }
+            _=> { // at a hidden layer or output layer
+
+                // check if partial_start_pos equals our current position 
+
+                // check if this partial derivative does exist
+                if partial_start_pos.layer_index < partial_end_pos.layer_index{
+                    return 0.0; // this partial derivative does not exist
+                } else {
+
+                    // calculate partials with product rule down with 
+
+                    //let derivative = neur
+                }
+                
             }
         }
         
+        
 
-        10
+        10.0
     }
 
 

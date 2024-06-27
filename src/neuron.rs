@@ -1,20 +1,51 @@
 
 
 use rand::{thread_rng, Rng};
+use std::hash::Hash;
+
+use crate::layer::{Layer};
 
 
-
+#[derive(PartialOrd)]
 pub struct Neuron{
     pub weights : Option<Vec<f32>>, // using direct indexing to previous layer.
-    pub bias : Option<f32> // using direct indexing to previous layer.
+    pub bias : Option<f32>, // using direct indexing to previous layer., 
+    id : u32
 
 }
 
+impl PartialEq for Neuron {
+    fn eq(&self, other: &Self) -> bool {
+        self.id == other.id
+    }
+}
+
+impl Ord for Neuron{
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        if self.id == other.id {
+            std::cmp::Ordering::Equal
+        } else if self.id > other.id{
+            std::cmp::Ordering::Greater
+        } else {
+            std::cmp::Ordering::Less
+        }
+    }
+}
+
+impl Eq for Neuron {}
+
+impl Hash for Neuron {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.id.hash(state);
+    }
+}
+
 impl Neuron{
-    pub fn new() -> Neuron{
+    pub fn new(id : u32) -> Neuron{
         Neuron{
             weights : None, 
-            bias : None
+            bias : None, 
+            id
         }
     }
 
