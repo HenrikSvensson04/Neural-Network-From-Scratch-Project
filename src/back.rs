@@ -42,6 +42,8 @@ pub fn backpropagate_weights_bias(correct_output_values : &Vec<f32>, input_to_ne
     layers.extend(&neural_network.hidden_layers);
     layers.push(&neural_network.output_layer.as_ref().unwrap());
 
+    println!("Lewngth: {:?}", layers.len());
+
     // includes the first input layer
     let neurons_values_map = neural_network.calculate_values_of_all_neurons_map(input_to_neural_network).unwrap(); // layer -> neuron
 
@@ -78,6 +80,8 @@ pub fn backpropagate_weights_bias(correct_output_values : &Vec<f32>, input_to_ne
             let derivative = calculate_partial_derivative(&variable_tree_start, &variable_tree_destination, neural_network, &neurons_values_map, &correct_output_values);
             println!("Some derivative bias: {}", derivative);
 
+            println!("");
+
         })
     });
     return gradient;
@@ -111,6 +115,7 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
         if variable_tree_start.layer.is_some() && variable_tree_start.layer == variable_tree_destination.layer{
             // Now we have reached our final neuron, becuase our destination variable level == current variable level
 
+            println!("Finished:");
             // set our layer
             let current_layer = variable_tree_start.layer.unwrap();
             // set out current neuron
@@ -128,6 +133,7 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
                         .unwrap();
 
                     // dZ(L)/dWn = a(L-1)(n), Thus return value of a(L-1)(n):
+                    println!("A(L-1)(n): {}", neurons_values.get(next_neuron).unwrap().clone());
                     return neurons_values.get(next_neuron).unwrap().clone();
                 }, 
                 TypeVariable::Bias => {
@@ -135,6 +141,8 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
                 }
             }
         } else {
+
+            println!("Go deeper:");
             // we should now continue deeper in variable tree, becuase our searched variable is at a preceding layer
 
             // check if we are at input layer
@@ -143,20 +151,42 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
             } else {
                 // we should now continue deeper in variable tree, becuase our searched variable is at a preceding layer
                 let current_neuron = variable_tree_start.neuron.unwrap();
+                let current_layer = variable_tree_start.layer.unwrap();
+                let preceding_layer = neural_network.get_preceding_layer(current_layer).unwrap();
 
                 // this is dZ(L-1)(n) / da(L-1)(k)
                 // Value of this is weight from neuron a(L)(n) to a(L-1)(k) = w(nk)
-                let dZda = current_neuron.weights.as_ref().unwrap().iter().map(|weight|{
 
+                let dZda = zip(current_neuron.weights.as_ref().unwrap().iter(), preceding_layer.neurons.iter()).map(|(weight, neuron)|{
+                    let new_variable_tree_start = VariableTreePosition::new(Some(&preceding_layer), Some(neuron), None, None);
+                    println!("dz(L)/da(L-1) {:?}", weight);
+
+                    // because we want what is inside the sigmoid : Thus z(L), use the inverse sigmoid
+                    let z = util::inverse_sigmoid(neurons_values.get(neuron).unwrap().clone());
+                    let dAdZ = util::derivative_of_sigmoid(z);
+                    println!("Z(L): {}", z);
+                    println!("dAdZ: {}", dAdZ);
+
+                    let daLdz = weight;
+
+                    return daLdz * dAdZ * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, correct_output_values);
+                }).sum(); // according to chain rule
+                
+                /* 
+                let dZda = current_neuron.weights.as_ref().unwrap().iter().map(|weight|{
                     let preceding_layer = neural_network.get_preceding_layer(variable_tree_start.layer.unwrap()).unwrap();
                     
                     let new_variable_tree_start = VariableTreePosition::new(Some(&preceding_layer), variable_tree_destination.neuron, None, None);
+                    println!("dz(L)/da(L-1) {:?}", weight);
                     return weight * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, correct_output_values);
                 }).sum(); // according to chain rule
+                */
                 return dZda;
             }
         }
     } else {
+
+        println!("Top:");
 
         // we start at the top, at the variable C
         //         Variable Tree
@@ -193,7 +223,7 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
             let new_variable_tree_start = 
                 // for the next iteration we set out output layer as our start layer in our variable tree
                 // Thus we start at z(L) in next iteration
-                VariableTreePosition::new(Some(&output_layer), variable_tree_destination.neuron, None, None);
+                VariableTreePosition::new(Some(&output_layer), Some(neuron), None, None);
 
             // recursively calculate next partials
             return dCdA * dAdZ * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, correct_output_values);

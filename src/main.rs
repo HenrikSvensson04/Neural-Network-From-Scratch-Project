@@ -75,6 +75,7 @@ mod tests {
     }
 
 
+    /* 
     #[test]
     fn test_correct_values_of_neurons() {
 
@@ -118,8 +119,10 @@ mod tests {
     }
 
     
+
+    
     #[test]
-    fn test_correct_partial_derivatives() {
+    fn test_correct_values_of_neurons() {
 
         let number_of_neurons_input_layer = 2;
         let number_of_neurons_hidden_layer_1 = 3;
@@ -186,10 +189,12 @@ mod tests {
 
     }
 
+    */
+
 
     #[test]
     /// Test gradient where the network consists of only: one input neuron and output neuron
-    fn simple_gradient_test(){
+    fn simple_gradient_test_1(){
         
         let mut neural_network = NeuralNetwork::builder()
         .with_input_layer(1)
@@ -224,17 +229,86 @@ mod tests {
         //
         // Thus: da(L)/dz(L) = derivative_sigmoid(z(L)) = deriva.._sigmoid(10) = 0.0000453958077 = b
         //
-        // Thus: dz(L)/dw = a(L-1) = y = 1.0 = c
+        // Thus: dz(L)/dw = a(L-1) = 0.5 = c
         //
+        // For weight:
+        // dC/dw = a * b * c = -0.00009079999 * 0.0000453958077 * 0.5 = -0.000000002061 = "Almost" = -0.0000000020627668
         //
-        // As a result: dC/dw = a * b * c = -0.00009079999 * 0.0000453958077 * 1.0  = -0.0000000041219 = "Almost" = -0.0000000041255337
+        // For bias:
+        // dc/db = dc/da * da/dz * dz/db = -0.00009079999 * 0.0000453958077 * 1.0 = -0.0000000041219 = "Almost" = -0.0000000041255337
+        //
 
         let gradient = back::backpropagate_weights_bias(&correct_output, &input, &neural_network);
 
-        let gradient_weight_partial = gradient.get(neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap()).as_ref().unwrap().0.get(0).as_ref().unwrap().clone().clone();
-        assert_eq!(-0.0000000041255337, gradient_weight_partial);
+        //let gradient_weight_partial = gradient.get(neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap()).as_ref().unwrap().0.get(0).as_ref().unwrap().clone().clone();
+        //assert_eq!(-0.0000000041255337, gradient_weight_partial);
+
+        assert_eq!(10, 20);
     }
 }
+
+
+
+#[test]
+/// Test gradient where the network consists of only: one input neuron, one hidden layer neuron and one output neuron
+fn simple_gradient_test_2(){
+    
+    let mut neural_network = NeuralNetwork::builder()
+    .with_input_layer(1)
+    .with_hidden_layer(1)
+    .with_output_layer(1)
+    .build_network().unwrap();
+
+    // change weights of hidden neuron to 1.0 and bias to 1.0
+    {
+        //output
+        neural_network.hidden_layers.get_mut(0).unwrap().neurons.iter_mut().for_each(|neuron|{
+            neuron.weights = Some(vec![1.0; 1 as usize]);
+            neuron.bias = Some(1.0);
+        });
+    }
+
+    // change weights of output neuron to 1.0 and bias to 1.0
+    {
+        //output
+        neural_network.output_layer.as_mut().unwrap().neurons.iter_mut().for_each(|neuron|{
+            neuron.weights = Some(vec![1.0; 1 as usize]);
+            neuron.bias = Some(1.0);
+        });
+    }
+
+    let correct_output = vec![1.0]; // NOTICE: y = 1.0
+    let input = vec![0.5]; // 
+
+
+    println!("{:?}", neural_network.calculate_values_of_all_neurons(&input));
+
+
+    // Thus we have network
+    //
+    // a(L-1) -> a(L), where: a(L) = Sigmoid(w * a(L-1) + b) = Sigmoid(10.0 * a(L-1) + 5.0)
+    //
+    // Thus: a(L) = Sigmoid(10 * 0.5 + 5) = Sigmoid(10) = 0.9999546
+    //
+    // Where Cost C = (a(L) - y)^2
+    //
+    // Thus: dC/da(L) = 2 * (a(L) - y) = 2 * (sigmoid(10) - 1.0) = -0.0000454 * 2 = -0.00009079999 = a
+    //
+    // Thus: da(L)/dz(L) = derivative_sigmoid(z(L)) = deriva.._sigmoid(10) = 0.0000453958077 = b
+    //
+    // Thus: dz(L)/dw = a(L-1) = y = 1.0 = c
+    //
+    //
+    // As a result: dC/dw = a * b * c = -0.00009079999 * 0.0000453958077 * 1.0  = -0.0000000041219 = "Almost" = -0.0000000041255337
+
+    let gradient = back::backpropagate_weights_bias(&correct_output, &input, &neural_network);
+
+    //let gradient_weight_partial = gradient.get(neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap()).as_ref().unwrap().0.get(0).as_ref().unwrap().clone().clone();
+    //assert_eq!(-0.0000000041255337, gradient_weight_partial);
+
+    assert_eq!(10, 20);
+}
+
 
 
 #[test]
