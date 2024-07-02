@@ -6,7 +6,7 @@ use std::hash::Hash;
 use crate::layer::{Layer};
 
 
-#[derive(PartialOrd)]
+#[derive(PartialOrd, Clone, Debug)]
 pub struct Neuron{
     pub weights : Option<Vec<f32>>, // using direct indexing to previous layer.
     pub bias : Option<f32>, // using direct indexing to previous layer., 
@@ -53,13 +53,14 @@ impl Neuron{
         // create random weights
         self.weights = Some(
             (0..number_of_neurons_previous_layer as usize).map(|redundant_i|{
-                let rand_weight = (thread_rng().gen::<f32>() * 0.5 - 1.0) * 2.0; // between -1 and 1
-                return rand_weight;
+                let rand_weight = (thread_rng().gen::<f32>() - 0.5) * 2.0;  /*Now between -1 and 1 */ //* 100.0; // between -100 and 100
+                //println!("weight; {}", rand_weight);
+                return rand_weight as f32
             }).collect()
         );
 
         // create random bias
-        self.bias = Some((thread_rng().gen::<f32>() * 0.5 - 1.0) * 2.0 /* between -1 and 1*/ );
+        self.bias = Some(((thread_rng().gen::<f32>() - 0.5) * 2.0) as f32);
 
     }
 }

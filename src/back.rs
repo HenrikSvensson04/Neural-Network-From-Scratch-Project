@@ -1,6 +1,6 @@
 use std::{collections::HashMap, iter::{zip, Map}};
 
-use crate::{layer::{self, Layer}, neural_network::{self, NeuralNetwork}, neuron::Neuron, util};
+use crate::{layer::{self, Layer}, neural_network::{self, NeuralNetwork}, neuron::{self, Neuron}, util};
 
 type Gradient = (Vec<f32>, f32);
 
@@ -28,67 +28,113 @@ impl<'a> VariableTreePosition<'a>{
     }
 }
 
+/// Calculate the cost a neural network given a test case
+pub fn calculate_cost(correct_output_values : &Vec<f32>, input_to_neural_network : &Vec<f32>, neural_network : &NeuralNetwork) -> f32{
 
+    // values of neurons in neural network given the input
+    let neurons_values_map = neural_network.calculate_values_of_all_neurons_map(input_to_neural_network).unwrap(); // layer -> neuron
 
+    let cost = zip(correct_output_values, neural_network.output_layer.as_ref().unwrap().neurons.iter()).map(|(correct_output, neuron)|{
+        
 
-// return the gradient of neural network with a test case
-pub fn backpropagate_weights_bias(correct_output_values : &Vec<f32>, input_to_neural_network : &Vec<f32>, neural_network : &NeuralNetwork) -> HashMap<Neuron, (Vec<f32>, f32)> /* key: Neuron, value: gradient(weights, bias)*/{
+        let inner =  neurons_values_map.get(neuron).unwrap() - correct_output;
+        return inner * inner;
+    }).sum();
+
+    return cost;
+}
+
+/// calculate the gradient of neural network given a test case - and optimize the neural network with the gradient
+pub fn backpropagate_weights_bias<'a>(correct_output_values : &'a Vec<f32>, input_to_neural_network : &'a Vec<f32>, neural_network : &'a NeuralNetwork) -> HashMap<Neuron, Gradient>/* key: Neuron, value: gradient(weights, bias)*/{
 
     // gradient
-    let gradient : HashMap<Neuron, Gradient> = HashMap::new();
-
-    // both hidden layers and output layer
-    let mut layers : Vec<&Layer> = Vec::new();
-    layers.extend(&neural_network.hidden_layers);
-    layers.push(&neural_network.output_layer.as_ref().unwrap());
-
-    println!("Lewngth: {:?}", layers.len());
+    let mut gradient : HashMap<Neuron, Gradient> = HashMap::new(); //Where: type Gradient = (Vec<f32>, f32); Thus: (weights, bias)
 
     // includes the first input layer
     let neurons_values_map = neural_network.calculate_values_of_all_neurons_map(input_to_neural_network).unwrap(); // layer -> neuron
+    let neurons_z_values_map = neural_network.calculate_values_of_all_neurons_z_value_map(input_to_neural_network).unwrap();
+
+    {
+        // both hidden layers and output layer
+        let mut layers : Vec<&Layer> = Vec::new();
+        layers.extend(&neural_network.hidden_layers);
+        layers.push(&neural_network.output_layer.as_ref().unwrap());
+
+        //println!("Lewngth: {:?}", layers.len());
 
 
-    // calculate gradient in respect to weights
-    layers.iter().for_each(|layer|{
+        // calculate gradient in respect to weights
+        layers.iter().for_each(|layer|{
 
-        layer.neurons.iter().for_each(|neuron|{
+            layer.neurons.iter().for_each(|neuron|{
 
-            // gradient relative to weight
-            for i in 0..neuron.weights.as_ref().unwrap().len() {
+                let mut local_gradient = (Vec::new(), 0.0);
+                // gradient relative to weight
+                for i in 0..neuron.weights.as_ref().unwrap().len() {
+                    let variable_tree_start = VariableTreePosition::new(None, None, None, None);
+                    let variable_tree_destination = 
+                        VariableTreePosition::new(
+                            Some(&layer),
+                            Some(&neuron), 
+                            Some(TypeVariable::Weight), 
+                            Some(i as i32)
+                    );
+
+                    let derivative = calculate_partial_derivative(&variable_tree_start, &variable_tree_destination, neural_network, &neurons_values_map, &neurons_z_values_map, &correct_output_values);
+                    //println!("Some derivative weight: {}", derivative);
+
+                    local_gradient.0.push(derivative);
+                }
+
+                // gradient relative to bias
                 let variable_tree_start = VariableTreePosition::new(None, None, None, None);
                 let variable_tree_destination = 
                     VariableTreePosition::new(
                         Some(&layer),
                         Some(&neuron), 
-                        Some(TypeVariable::Weight), 
-                        Some(i as i32)
+                        Some(TypeVariable::Bias), 
+                        None
                 );
+                let derivative = calculate_partial_derivative(&variable_tree_start, &variable_tree_destination, neural_network, &neurons_values_map, &neurons_z_values_map, &correct_output_values);
+                //println!("Some derivative bias: {}", derivative);
 
-                let derivative = calculate_partial_derivative(&variable_tree_start, &variable_tree_destination, neural_network, &neurons_values_map, &correct_output_values);
-                println!("Some derivative weight: {}", derivative);
-            }
+                local_gradient.1 = derivative;
 
-            // gradient relative to bias
-            let variable_tree_start = VariableTreePosition::new(None, None, None, None);
-            let variable_tree_destination = 
-                VariableTreePosition::new(
-                    Some(&layer),
-                    Some(&neuron), 
-                    Some(TypeVariable::Bias), 
-                    None
-            );
-            let derivative = calculate_partial_derivative(&variable_tree_start, &variable_tree_destination, neural_network, &neurons_values_map, &correct_output_values);
-            println!("Some derivative bias: {}", derivative);
+                // bad solution? Should not really be a clone, it should reference to neural network, however references here does not permit changing the network later on.
+                gradient.insert(neuron.clone(), local_gradient);
 
-            println!("");
-
-        })
-    });
+            })
+        });
+    }
     return gradient;
 }
 
 
-fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, variable_tree_destination : &VariableTreePosition, neural_network : &NeuralNetwork, neurons_values : &HashMap<&Neuron, f32>, correct_output_values : &Vec<f32>) -> f32{
+pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &HashMap<Neuron, Gradient>){
+
+    // Update the neural network with the derivatives
+    // Note: The cost function reduces if we move in the direction of the negative gradient
+    // Moreover, the gradient tells us how much the cost function change given a change to input variables.
+
+    let iter_neurons = neural_network.hidden_layers.iter_mut().chain(neural_network.output_layer.iter_mut());
+    iter_neurons.for_each(|layer|{
+        layer.neurons.iter_mut().for_each(|neuron|{
+            if let Some(gradient_for_neuron) = gradient.get(neuron){
+                zip(neuron.weights.as_mut().unwrap(), &gradient_for_neuron.0).into_iter().for_each(|(weight, weight_derivative)|{
+                    *weight = (*weight) -  (1.0) * weight_derivative;
+                    //println!("Derivative weight: {}", weight_derivative);
+                }); 
+
+                if let Some(bias) = &mut neuron.bias{
+                    *bias = (*bias) -  (1.0) * gradient_for_neuron.1;
+                }
+            }
+        });
+    });
+}
+
+
+fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, variable_tree_destination : &VariableTreePosition, neural_network : &NeuralNetwork, neurons_values : &HashMap<&Neuron, f32>, neurons_z_values : &HashMap<&Neuron, f32>, correct_output_values : &Vec<f32>) -> f32{
         // 
         //         Variable Tree
         //             C 
@@ -115,7 +161,7 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
         if variable_tree_start.layer.is_some() && variable_tree_start.layer == variable_tree_destination.layer{
             // Now we have reached our final neuron, becuase our destination variable level == current variable level
 
-            println!("Finished:");
+            //println!("Finished:");
             // set our layer
             let current_layer = variable_tree_start.layer.unwrap();
             // set out current neuron
@@ -162,14 +208,15 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
                     println!("dz(L)/da(L-1) {:?}", weight);
 
                     // because we want what is inside the sigmoid : Thus z(L), use the inverse sigmoid
-                    let z = util::inverse_sigmoid(neurons_values.get(neuron).unwrap().clone());
+                    let z = neurons_z_values.get(neuron).unwrap().clone();
+                    //let z = util::inverse_sigmoid(neurons_values.get(neuron).unwrap().clone()); // TODO: replace this, as it seems it gives value: inf, infinity sometimes
                     let dAdZ = util::derivative_of_sigmoid(z);
                     println!("Z(L): {}", z);
                     println!("dAdZ: {}", dAdZ);
 
                     let daLdz = weight;
 
-                    return daLdz * dAdZ * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, correct_output_values);
+                    return daLdz * dAdZ * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, neurons_z_values, correct_output_values);
                 }).sum(); // according to chain rule
                 
                 /* 
@@ -186,7 +233,7 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
         }
     } else {
 
-        println!("Top:");
+        //println!("Top:");
 
         // we start at the top, at the variable C
         //         Variable Tree
@@ -214,7 +261,8 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
             let dCdA = 2.0 * (neurons_values.get(neuron).unwrap() - correct_value); 
             println!("dCdA: {}", dCdA);
             // because we want what is inside the sigmoid : Thus z(L), use the inverse sigmoid
-            let z = util::inverse_sigmoid(neurons_values.get(neuron).unwrap().clone());
+            //let z = util::inverse_sigmoid(neurons_values.get(neuron).unwrap().clone()); // TODO: replace this, as it seems it gives value: inf, infinity sometimes
+            let z = neurons_z_values.get(neuron).unwrap().clone();
             let dAdZ = util::derivative_of_sigmoid(z);
             println!("Z(L): {}", z);
             println!("dAdZ: {}", dAdZ);
@@ -226,7 +274,7 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
                 VariableTreePosition::new(Some(&output_layer), Some(neuron), None, None);
 
             // recursively calculate next partials
-            return dCdA * dAdZ * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, correct_output_values);
+            return dCdA * dAdZ * calculate_partial_derivative(&new_variable_tree_start, variable_tree_destination, neural_network, neurons_values, neurons_z_values, correct_output_values);
 
         }).sum(); // according to chain rule
 

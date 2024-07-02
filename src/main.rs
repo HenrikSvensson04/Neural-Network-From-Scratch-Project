@@ -8,6 +8,8 @@ mod layer;
 mod backpropagation;
 mod back;
 mod util;
+mod backprop;
+mod Neuron;
 //mod Layer;
 //mod Neuron;
 //mod Layer;
@@ -16,21 +18,53 @@ use backpropagation::{SquishFunction, TraningHandeler};
 
 use crate::neural_network::NeuralNetwork;
 
-
 fn main() {
     println!("Hello, world!");
     
     let mut nw = NeuralNetwork::builder()
-        .with_input_layer(1)
-        .with_hidden_layer(200)
-        .with_hidden_layer(2)
-        .with_hidden_layer(2)
-        .with_hidden_layer(20)
-        .with_hidden_layer(20)
-        .with_hidden_layer(20)
-        .with_output_layer(1)
+        .with_input_layer(2)
+        .with_hidden_layer(50)
+        .with_hidden_layer(10)
+        .with_output_layer(3)
         .build_network().unwrap();
 
+    
+
+
+
+    let correct_output = vec![0.0, 1.0, 0.0];
+    let input = vec![1.0, 1.0]; // 
+
+
+    let mut gradient = backprop::backpropagate(&correct_output, &input, &nw);
+
+    println!("Initial cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    
+    println!("Weight updated; {:?}", nw.output_layer.as_ref().unwrap().neurons.get(0).unwrap().weights.as_ref().unwrap().get(0).unwrap());
+
+    gradient = backprop::backpropagate(&correct_output, &input, &nw);
+    back::update_neural_network(&mut nw, &gradient);
+    println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+    println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    
+
+
+    for i in 0..10000 {
+        gradient = backprop::backpropagate(&correct_output, &input, &nw);
+        back::update_neural_network(&mut nw, &gradient);
+
+        if i % 1000 == 1{
+            println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+        }
+        //println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+        //println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    }
+
+    gradient = backprop::backpropagate(&correct_output, &input, &nw);
+    back::update_neural_network(&mut nw, &gradient);
+    println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+    println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    /* 
     //let mut traning_handeler = TraningHandeler::new(SquishFunction::sigmoid, &mut nw);
     
 
@@ -41,7 +75,42 @@ fn main() {
 
     //traning_handeler.backpropagate_network(&mut nw);
 
-    back::backpropagate_weights_bias(&vec![1.0], &vec![0.5], &nw);
+    let correct_output = vec![0.0, 1.0];
+    let input = vec![0.5, 0.5]; // 
+
+    println!("initial cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+    let mut gradient = back::backpropagate_weights_bias(&correct_output, &input, &nw);
+    back::update_neural_network(&mut nw, &gradient);
+    println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+
+    /*
+
+    println!("Weight updated; {:?}", nw.output_layer.as_ref().unwrap().neurons.get(0).unwrap().weights.as_ref().unwrap().get(0).unwrap());
+
+    gradient = back::backpropagate_weights_bias(&correct_output, &input, &nw);
+    back::update_neural_network(&mut nw, &gradient);
+    println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+    println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    */
+
+
+    for i in 0..100000 {
+        gradient = back::backpropagate_weights_bias(&correct_output, &input, &nw);
+        back::update_neural_network(&mut nw, &gradient);
+
+        if i % 10000 == 1{
+            println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+        }
+        //println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+        //println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    }
+
+    gradient = back::backpropagate_weights_bias(&correct_output, &input, &nw);
+    back::update_neural_network(&mut nw, &gradient);
+    println!("{:?}", nw.calculate_values_of_all_neurons(&input));
+    println!("cost: {}", back::calculate_cost(&correct_output, &input, &nw));
+    */
     
 }
 
@@ -238,7 +307,7 @@ mod tests {
         // dc/db = dc/da * da/dz * dz/db = -0.00009079999 * 0.0000453958077 * 1.0 = -0.0000000041219 = "Almost" = -0.0000000041255337
         //
 
-        let gradient = back::backpropagate_weights_bias(&correct_output, &input, &neural_network);
+        let gradient = back::backpropagate_weights_bias(&correct_output, &input, &mut neural_network);
 
         //let gradient_weight_partial = gradient.get(neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap()).as_ref().unwrap().0.get(0).as_ref().unwrap().clone().clone();
         //assert_eq!(-0.0000000041255337, gradient_weight_partial);
@@ -301,7 +370,13 @@ fn simple_gradient_test_2(){
     //
     // As a result: dC/dw = a * b * c = -0.00009079999 * 0.0000453958077 * 1.0  = -0.0000000041219 = "Almost" = -0.0000000041255337
 
-    let gradient = back::backpropagate_weights_bias(&correct_output, &input, &neural_network);
+    let gradient = back::backpropagate_weights_bias(&correct_output, &input, &mut neural_network);
+
+    println!("{:?}", gradient.iter());
+
+    let g = backprop::backpropagate(&correct_output, &input, &neural_network);
+
+    println!("{:?}", g.iter());
 
     //let gradient_weight_partial = gradient.get(neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap()).as_ref().unwrap().0.get(0).as_ref().unwrap().clone().clone();
     //assert_eq!(-0.0000000041255337, gradient_weight_partial);
