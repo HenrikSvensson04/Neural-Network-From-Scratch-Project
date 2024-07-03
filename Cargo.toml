@@ -6,6 +6,14 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-
 rand = "0.8.4"
 nalgebra = "0.33.0"
+
+[lib]
+name = "simple_neural_network_project"
+path = "src/lib.rs"
+
+
+[[bin]]
+name = "neural_network_visualizer"
+path = "src/bin/main.rs" # replace bin.rs with name of your file

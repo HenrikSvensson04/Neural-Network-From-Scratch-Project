@@ -1,6 +1,6 @@
 use std::{collections::HashMap, iter::{zip, Map}};
 
-use crate::{layer::{self, Layer}, neural_network::{self, NeuralNetwork}, neuron::{self, Neuron}, util};
+use crate::{layer::{self, Layer}, neural_network::{self, NeuralNetwork, TypeNeuronValue}, neuron::{self, Neuron}, util};
 
 type Gradient = (Vec<f32>, f32);
 
@@ -32,18 +32,20 @@ impl<'a> VariableTreePosition<'a>{
 pub fn calculate_cost(correct_output_values : &Vec<f32>, input_to_neural_network : &Vec<f32>, neural_network : &NeuralNetwork) -> f32{
 
     // values of neurons in neural network given the input
-    let neurons_values_map = neural_network.calculate_values_of_all_neurons_map(input_to_neural_network).unwrap(); // layer -> neuron
+    let neurons_values_map = neural_network.feedforward_to_map(input_to_neural_network).unwrap(); // layer -> neuron
 
     let cost = zip(correct_output_values, neural_network.output_layer.as_ref().unwrap().neurons.iter()).map(|(correct_output, neuron)|{
         
 
-        let inner =  neurons_values_map.get(neuron).unwrap() - correct_output;
+        let inner =  neurons_values_map.get(&(neuron, TypeNeuronValue::A)).unwrap() - correct_output;
         return inner * inner;
     }).sum();
 
     return cost;
 }
 
+
+/*
 /// calculate the gradient of neural network given a test case - and optimize the neural network with the gradient
 pub fn backpropagate_weights_bias<'a>(correct_output_values : &'a Vec<f32>, input_to_neural_network : &'a Vec<f32>, neural_network : &'a NeuralNetwork) -> HashMap<Neuron, Gradient>/* key: Neuron, value: gradient(weights, bias)*/{
 
@@ -132,7 +134,6 @@ pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Ha
         });
     });
 }
-
 
 fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, variable_tree_destination : &VariableTreePosition, neural_network : &NeuralNetwork, neurons_values : &HashMap<&Neuron, f32>, neurons_z_values : &HashMap<&Neuron, f32>, correct_output_values : &Vec<f32>) -> f32{
         // 
@@ -281,3 +282,5 @@ fn calculate_partial_derivative(variable_tree_start : &VariableTreePosition, var
         return derivative;
     }
 }
+
+*/

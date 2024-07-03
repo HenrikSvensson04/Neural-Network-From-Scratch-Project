@@ -9,7 +9,7 @@ type local_neuron_tuple = (Vec<f32>, f32); //
 
 
 
-
+/*
 #[derive(PartialEq, Clone)]
 enum TypeVariable{
     CostFunctionTop, // Thus C = ....
@@ -260,6 +260,8 @@ impl TraningHandeler{
         10.0
     }
 
+    */
+
 
 
     /*
@@ -364,4 +366,4 @@ impl TraningHandeler{
     }
 
     */
-}
+//}
