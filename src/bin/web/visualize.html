@@ -1,0 +1,127 @@
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>D3.js Example</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+
+    <div id="my_dataviz"></div>
+    <script>
+
+
+
+
+
+        function fetchStatus() {
+        
+
+            tbl = document.getElementById('my_dataviz');
+    
+            // Overwrite the existing HTML with new content received.
+            tbl.innerHTML = '';
+
+
+
+            // set the dimensions and margins of the graph
+            const margin = {top: 10, right: 30, bottom: 30, left: 60},
+                    width = 460 - margin.left - margin.right,
+                    height = 400 - margin.top - margin.bottom;
+            
+            // append the svg object to the body of the page
+            const svg = d3.select("#my_dataviz")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left}, ${margin.top})`);
+
+            // Add X axis
+            const x = d3.scaleLinear()
+                .domain([0, 1])
+                .range([ 0, width ]);
+                svg.append("g")
+                .attr("transform", `translate(0, ${height})`)
+                .call(d3.axisBottom(x));
+            
+                // Add Y axis
+                const y = d3.scaleLinear()
+                .domain([0, 1])
+                .range([ height, 0]);
+                svg.append("g")
+                .call(d3.axisLeft(y));
+
+            d3.csv("/dataset_1.csv").then( function(data) {
+                // Add dots
+                svg.append('g')
+                .selectAll("dot")
+                .data(data)
+                .join("rect")
+                    .attr("x", function (d) { return x(d.CoordX); } )
+                    .attr("y", function (d) { return y(d.CoordY); } )
+                    .attr("width", 5) 
+                    .attr("height", 5) 
+                    .style("fill", function(d){
+                        if(d.Type == 0){
+                            return "#00b3a2";
+                        } else {
+                            return "#EC3A3A";
+                        }
+                    });
+            
+            })
+            
+            
+
+            d3.csv("/dataset.csv").then( function(data) {
+                // Add dots
+                svg.append('g')
+                .selectAll("dot")
+                .data(data)
+                .join("circle")
+                    .attr("cx", function (d) { return x(d.CoordX); } )
+                    .attr("cy", function (d) { return y(d.CoordY); } )
+                    .attr("r", 5) 
+                    .style("fill", function(d){
+                        if(d.Type == 0){
+                            return "#00b3a2";
+                        } else {
+                            return "#EC3A3A";
+                        }
+                    });
+            
+            })
+            
+            d3.csv("/network_generated_values.csv").then( function(data) {
+                // Add dots
+                svg.append('g')
+                .selectAll("dot")
+                .data(data)
+                .join("rect")
+                    .attr("x", function (d) { return x(d.pos_x); } )
+                    .attr("y", function (d) { return y(d.pos_y); } )
+                    .attr("width", 1.5) 
+                    .attr("height", 1.5) 
+                    .style("fill", function(d){
+                        return d.color;
+                    });
+            
+            })
+        }
+
+        window.addEventListener('load', function () {
+        // Your document is loaded.
+        var fetchInterval = 1000; // 1 seconds.
+
+        // Invoke the request every 5 seconds.
+        setInterval(fetchStatus, fetchInterval);
+        });
+
+        </script>
+</body>
+</html>

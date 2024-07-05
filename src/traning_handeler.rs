@@ -49,10 +49,10 @@ impl TraningHandeler{
                 match gradient.is_some(){
                     true => {
                         let mut redundant_swap : Option<Gradient> = None;
-                        // swap references in memory - to make sure we dont have to clone()
+                        // swap references in memory - to make sure we don't have to make unnecceary clone()
                         std::mem::swap(&mut gradient, &mut redundant_swap); 
                         
-                        // add gradient
+                        // add gradients together
                         gradient = Some(redundant_swap.unwrap() + backprop::backpropagate(&correct_output, &input, &neural_network));
                     }, 
                     _=> {

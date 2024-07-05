@@ -240,7 +240,6 @@ impl NeuralNetwork{
         return None;
     }
 
-
     pub fn get_preceding_layer(&self, layer : &Layer) -> Option<&Layer>{ // return None if layer is the input layer
 
         if &*layer == self.output_layer.as_ref().unwrap(){
@@ -260,8 +259,3 @@ impl NeuralNetwork{
         }
     }
 }
-
-
-
-
-
