@@ -49,7 +49,6 @@ impl Add for Gradient {
     }
 }
 
-
 /// Calculate the cost of a neural network given a test case
 /// This calculates the: Mean Absolute Error
 pub fn calculate_cost(correct_output_values : &Vec<f32>, input_to_neural_network : &Vec<f32>, neural_network : &NeuralNetwork) -> f32{

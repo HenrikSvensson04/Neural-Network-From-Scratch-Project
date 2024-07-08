@@ -4,8 +4,8 @@ use crate::{backprop::{self, Gradient}, neural_network::NeuralNetwork};
 
 pub struct TraningHandeler{
     // todo: insert traning data
-    traning_data_input : Vec<Vec<f32>>,
-    traning_data_correct_output : Vec<Vec<f32>>,
+    pub traning_data_input : Vec<Vec<f32>>,
+    pub traning_data_correct_output : Vec<Vec<f32>>,
     traning_data_num_neurons_input : u32,
     traning_data_num_neurons_output : u32
 }

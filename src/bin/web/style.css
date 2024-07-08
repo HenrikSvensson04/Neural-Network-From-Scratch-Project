@@ -1,1 +1,141 @@
 
+
+body {
+    margin: 0;
+}
+
+
+.top{
+    height : 200px;
+    display: flex;
+}
+
+.top-section{
+    text-align: center;
+    font: 1.2rem "Fira Sans", sans-serif;
+    font-size: 50px;
+    color : rgb(255, 255, 255);
+    width : 100%;
+    background-color: rgb(81, 173, 119);
+}
+
+
+.visualize{
+    border-top:1px solid rgb(136, 136, 136);
+    height : 500px;
+    display: flex;
+}
+
+
+.visualisation-right-right{
+    width : 20%;
+    background-color: white;
+    display: grid;
+}
+
+.visualisation-right-mid {
+    width : 9%;
+    background-color: rgb(240, 240, 240);
+    display: grid;
+    grid-template-rows: repeat(20, auto);
+    gap: 10px; /* Optional: adds space between rows */
+    padding-top: 5px;
+    padding-left: 10px;
+    padding-right: 10px;
+    padding-bottom: 70px;
+    border: 1px solid #ccc; /* Optional: adds a border around the grid container */
+}
+
+
+
+.control-1{
+    
+    grid-row: 1; 
+    grid-column: 1; 
+    background-color: aquamarine;
+    
+}
+
+.control-2{
+    
+    grid-row: 2; 
+    grid-column: 1; 
+    background-color: rgb(48, 105, 86);
+    
+}
+
+.control-3{
+    
+    grid-row: 3; 
+    grid-column: 1; 
+
+    
+}
+
+.control-3{
+    
+    grid-row: 4; 
+    grid-column: 1; 
+
+    
+}
+
+
+
+.v{
+    padding-top : 50px;
+    padding-left : 50px;
+    height : 100%;
+    width : 100%
+}
+
+.visualisation-left-mid{
+    width :51%;
+    background-color: rgb(207, 207, 207);
+}
+
+.visualisation-left-left{
+    width : 20%;
+    background-color: white;
+}
+
+
+.bottom {
+    background-color: white;
+    height : 300px
+}
+
+.button {
+    background-color: #FFFFFF;
+    border: 1px solid rgb(209,213,219);
+    border-radius: .5rem;
+    box-sizing: border-box;
+    color: #111827;
+    font-family: "Inter var",ui-sans-serif,system-ui,-apple-system,system-ui,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol","Noto Color Emoji";
+    font-size: .875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    padding: .75rem 1rem;
+    text-align: center;
+    text-decoration: none #D1D5DB solid;
+    text-decoration-thickness: auto;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    cursor: pointer;
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: manipulation;
+}
+
+.button:hover {
+background-color: rgb(223, 223, 223);
+}
+
+.button:focus {
+outline: 2px solid transparent;
+outline-offset: 2px;
+}
+
+.button:focus-visible {
+box-shadow: none;
+}
+

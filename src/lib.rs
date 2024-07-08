@@ -10,6 +10,14 @@ pub mod back;
 mod util;
 pub mod backprop;
 pub mod traning_handeler;
+
+mod wrapper;
+
+use crate::wrapper::NeuralWrapper;
+
+use wasm_bindgen::prelude::*;
+
+
 //mod Layer;
 //mod Neuron;
 //mod Layer;
@@ -17,6 +25,14 @@ pub mod traning_handeler;
 //use backpropagation::{SquishFunction, TraningHandeler};
 
 use crate::neural_network::NeuralNetwork;
+
+
+
+#[wasm_bindgen]
+pub fn echo(i : i32) -> i32{
+    i
+}
+
 
 
 #[cfg(test)]
