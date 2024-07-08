@@ -2,7 +2,7 @@
 
 
 use wasm_bindgen::prelude::*;
-use crate::{backprop, neural_network::NeuralNetwork, traning_handeler::TraningHandeler};
+use crate::{backprop, neural_network::NeuralNetwork, traning_handeler::TraningHandeler, neural_network::TypeNeuronValue};
 
 
 
@@ -47,6 +47,32 @@ impl NeuralWrapper{
             traning_handeler.traning_data_input.push(input);
             traning_handeler.traning_data_correct_output.push(correct_output);
         }
+    }
+
+    #[wasm_bindgen]
+    pub fn train(&mut self, epochs : u32){
+        if let Some(traning_handeler) = &mut self.traning_handeler{
+            traning_handeler.train_neural_network(&mut self.neural_network, epochs);
+        }
+    }
+
+    /// TODO: Make this function safe somehow!
+    #[wasm_bindgen]
+    pub fn get_output(&mut self, input : Vec<f32>) -> Vec<f32>{
+
+        // calculate values of neurons given the input
+        let feedforward_values = self.neural_network.feedforward_to_map(&input);
+
+        // extract the values of the output neurons
+        let vec : Vec<f32> = if let Some(values) = feedforward_values{
+            let vec : Vec<f32>= self.neural_network.output_layer.as_ref().unwrap().neurons.iter().map(|neuron|{
+                values.get(&(neuron, TypeNeuronValue::A)).unwrap().clone()
+            }).collect();
+            return vec;
+        } else {
+            Vec::new()
+        };
+        return vec;
     }
 
     #[wasm_bindgen]

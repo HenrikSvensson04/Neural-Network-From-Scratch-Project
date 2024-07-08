@@ -116,7 +116,7 @@
                   .domain([0.0, 1.0])
                   .range([height, 0])
           */
-          svg.append("g").call(d3.axisLeft(y));
+          //svg.append("g").call(d3.axisLeft(y));
 
           var data = [ {x:0.10, y:0.20}, {x:0.40, y:0.90}, {x:0.80, y:0.50} ]
           
@@ -142,7 +142,7 @@
 
 
   <script>
-
+    
     var margin = {top: 20, right:10, bottom: 30, left: 50}
     var width = 400;
     var height = 400; 
@@ -225,6 +225,7 @@
       .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
       .style("stroke", "black")    // set the line colour
       
+      
       //.attr("fill", function(d,j) {return d3.rgb(matrix[d][j].r * 256, matrix[d][j].g * 256, matrix[d][j].b * 256); });
     </script>
     <script type="module">
@@ -239,14 +240,152 @@
         // The boiler plate project comes with a `greet` function that calls:
         alert("Hello, hello-wasm!");
 
-        var neural_network_wrapper = new NeuralWrapper(100);
+        var neural_network_wrapper = new NeuralWrapper(4);
         //var v = neural_network_wrapper.echo(100);
         //alert(v.toString());
 
         //alert(neural_network_wrapper.get_something().toString())
-        neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
 
-        alert(neural_network_wrapper.get().toString());
+        neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
+        
+        neural_network_wrapper.insert_traning_data([0.1, 0.2], [0.0, 1.0])
+        neural_network_wrapper.insert_traning_data([0.3, 0.1], [0.0, 1.0])
+        neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
+        neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
+        neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
+
+        neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
+        neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
+        neural_network_wrapper.insert_traning_data([0.62, 0.5], [0.0, 1.0])
+        neural_network_wrapper.insert_traning_data([0.64, 0.59], [0.0, 1.0])
+
+        neural_network_wrapper.insert_traning_data([0.3, 0.3], [1.0, 0.0])
+        neural_network_wrapper.insert_traning_data([0.35, 0.35], [1.0, 0.0])
+        neural_network_wrapper.insert_traning_data([0.40, 0.3], [1.0, 0.0])
+        neural_network_wrapper.insert_traning_data([0.4, 0.35], [1.0, 0.0])
+
+        var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
+        var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
+        
+        neural_network_wrapper.train(100000)
+        var out = neural_network_wrapper.get_output([0.3, 0.3])
+
+        alert(out.toString())
+
+
+
+
+        // For graphics
+
+        var margin = {top: 20, right:10, bottom: 30, left: 50}
+        var width = 400;
+        var height = 400; 
+
+        var svg = d3.select("#vis")//.append("svg").attr("width", width).attr("height", height)
+        //var svg = d3.select("#data_area")
+        .attr("width", width + margin.left + margin.right)
+        .attr("height", height + margin.top + margin.bottom)
+        .append("g")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+              
+    
+    
+        // Retrived from: https://wizardace.com/d3-heatmap/
+        var n = 100;
+        var matrix = new Array(n);
+        for(var i = 0; i < n; i++) {
+          matrix[i] = new Array(n);
+          for(var j = 0; j < n; j++) {
+            //console.log([i / 100, j / 100].toString())
+            matrix[i][j] = neural_network_wrapper.get_output([j / n, 1.0 - i / n]);
+          }
+        }
+      
+        // Retrived from: https://wizardace.com/d3-heatmap/
+        var svg = d3.select("#vis").append("svg").attr("width", width).attr("height", height);
+        g = svg.append("g").attr("transform", "translate(" + 0 + "," + 0 + ")");
+      
+        // Retrived from: https://wizardace.com/d3-heatmap/
+        var scale = d3.scaleBand().rangeRound([0, d3.min([width, height])]).domain(d3.range(n));
+      
+        var color = d3.scaleSequential(
+            function(t) { return d3.interpolate("white", "steelblue")(t); }
+          )
+          .domain([0, d3.max(matrix, function(row) { return d3.max(row) })]);
+      
+        // Retrived from: https://wizardace.com/d3-heatmap/
+        g.selectAll(".row")
+          .data(matrix)
+          .enter()
+          .append("g")
+          .attr("class", "row")
+          .attr("transform", function(d, i) { return "translate(0," + scale(i) + ")"; })
+          .selectAll(".cell")
+          .data(function(d) { return d })
+          .enter()
+          .append("rect")
+          .attr("class", "cell")
+          .attr("x", function(d, i) { return scale(i); })
+          .attr("width", scale.bandwidth())
+          .attr("height", scale.bandwidth())
+          .attr("opacity", 0.7)
+          //.attr("fill", function(d) {return d3.rgb(d * 256 * Math.random(), 0, 0); });
+          .attr("fill", function(d) {
+            console.log(d)
+
+            //return d3.rgb(d[1] * 256, d[0] * 256, 0); 
+            
+            if(d[0] < d[1]){
+              //return d3.rgb(d[0] * 256, d[0] * 256, d[0] * 256); 
+              return d3.rgb(160, 0, 0); 
+            } else {
+              return d3.rgb(0, 160, 0); 
+            }
+              
+            
+          
+          });
+
+
+          // set x-axis scale
+          var x = d3.scaleLinear()
+                  .domain([0.0, 1.0])
+                  .range([0, width])
+
+          svg.append("g")
+          .attr("transform", "translate(0, " + height + ")").call(d3.axisBottom(x));
+
+          var y = d3.scaleLinear()
+                  .domain([0.0, 1.0])
+                  .range([height, 0])
+
+          svg.append("g").call(d3.axisLeft(y));
+
+          // Add 3 dots for 0, 50 and 100%
+          svg
+          .selectAll("whatever")
+          .data(data_type_a)
+          .enter()
+          .append("circle")
+          .attr("cx", function(d){ return x(d.x) })
+          .attr("cy", function(d){ return y(d.y) })
+          .attr("r", 5)
+          .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
+          .style("stroke", "black")    // set the line colour
+
+          svg
+          .selectAll("whatever")
+          .data(data_type_b)
+          .enter()
+          .append("circle")
+          .attr("cx", function(d){ return x(d.x) })
+          .attr("cy", function(d){ return y(d.y) })
+          .attr("r", 5)
+          .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
+          .style("stroke", "black")    // set the line colour
+
+        //alert(neural_network_wrapper.get().toString());
 
         /*
         // fetch initial dataset
