@@ -93,6 +93,11 @@ impl NeuralWrapper{
         self.neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap().bias.unwrap() as f64
     }
 
+    #[wasm_bindgen]
+    pub fn get_json_serialized(&self) -> String{
+        serde_json::to_string(&self).expect("Works!")
+    }
+
 
     //https://www.makeuseof.com/json-serialization-and-deserialization-rust/
 }

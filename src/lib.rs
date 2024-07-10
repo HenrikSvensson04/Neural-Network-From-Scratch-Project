@@ -30,6 +30,10 @@ use serde_json::*;
 use crate::neural_network::NeuralNetwork;
 
 
+#[wasm_bindgen]
+pub fn str() -> String{
+    "Hola".to_string()
+}
 
 #[wasm_bindgen]
 pub fn echo(wrapper : &NeuralWrapper) -> String{
