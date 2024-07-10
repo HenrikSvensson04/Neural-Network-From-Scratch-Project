@@ -17,6 +17,9 @@ use crate::wrapper::NeuralWrapper;
 
 use wasm_bindgen::prelude::*;
 
+use serde::{Serialize, Deserialize};
+use serde_json::*;
+
 
 //mod Layer;
 //mod Neuron;
@@ -29,8 +32,13 @@ use crate::neural_network::NeuralNetwork;
 
 
 #[wasm_bindgen]
-pub fn echo(i : i32) -> i32{
-    i
+pub fn echo(wrapper : &NeuralWrapper) -> String{
+    serde_json::to_string(&wrapper).unwrap()
+}
+
+#[wasm_bindgen]
+pub fn serialize_neural_wrapper(wrapper : &NeuralWrapper) -> String{
+    serde_json::to_string(&wrapper).unwrap()
 }
 
 

@@ -1,7 +1,9 @@
 use std::iter::zip;
 
 use crate::{backprop::{self, Gradient}, neural_network::NeuralNetwork};
+use serde::{Serialize, Deserialize};
 
+#[derive(Serialize, Deserialize)]
 pub struct TraningHandeler{
     // todo: insert traning data
     pub traning_data_input : Vec<Vec<f32>>,

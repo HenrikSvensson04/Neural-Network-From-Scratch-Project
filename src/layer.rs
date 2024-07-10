@@ -1,9 +1,9 @@
 
 
 use crate::neuron::Neuron;
+use serde::{Serialize, Deserialize};
 
-
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Serialize, Deserialize)]
 pub struct Layer{
     pub neurons : Vec<Neuron> // direct indexing
 }

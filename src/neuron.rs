@@ -5,8 +5,10 @@ use std::hash::Hash;
 
 use crate::layer::{Layer};
 
+use serde::{Serialize, Deserialize};
 
-#[derive(PartialOrd, Clone, Debug)]
+
+#[derive(PartialOrd, Clone, Debug, Serialize, Deserialize)]
 pub struct Neuron{
     pub weights : Option<Vec<f32>>, // using direct indexing to previous layer.
     pub bias : Option<f32>, // using direct indexing to previous layer., 

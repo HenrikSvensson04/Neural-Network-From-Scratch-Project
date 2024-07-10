@@ -4,6 +4,10 @@
 use wasm_bindgen::prelude::*;
 use crate::{backprop, neural_network::NeuralNetwork, traning_handeler::TraningHandeler, neural_network::TypeNeuronValue};
 
+//use Serde::{Serialize, DeSerialize};
+use serde::{Serialize, Deserialize};
+use serde_json;
+
 
 
 // https://developer.mozilla.org/en-US/docs/WebAssembly/Rust_to_Wasm
@@ -12,6 +16,7 @@ use crate::{backprop, neural_network::NeuralNetwork, traning_handeler::TraningHa
 // For visualiation and draw pixels and circle: html canvas
 
 #[wasm_bindgen]
+#[derive(Serialize, Deserialize)]
 pub struct NeuralWrapper{
     neural_network : NeuralNetwork,
     traning_handeler : Option<TraningHandeler>
@@ -20,20 +25,27 @@ pub struct NeuralWrapper{
 #[wasm_bindgen]
 impl NeuralWrapper{
     #[wasm_bindgen(constructor)]
-    pub fn new(hidden_layers : u32) -> NeuralWrapper{
-        let mut wrapper = NeuralWrapper{ 
-            neural_network: {
-                NeuralNetwork::builder()
-                    .with_input_layer(2)
-                    .with_hidden_layer(hidden_layers)
-                    .with_output_layer(2)
-                    .build_network()
-                    .unwrap()
-            }, 
-            traning_handeler: None
-        };
-        wrapper.initalize_traning_handeler();
-        wrapper
+    pub fn new(hidden_layers : u32, type_of_creation : String, json : String) -> NeuralWrapper{
+
+        // create either object from json sessionStorage or from scratch
+        if type_of_creation == "json"{
+            let neural_wrapper: NeuralWrapper = serde_json::from_str(&json).unwrap();
+            neural_wrapper
+        } else {
+            let mut wrapper = NeuralWrapper{ 
+                neural_network: {
+                    NeuralNetwork::builder()
+                        .with_input_layer(2)
+                        .with_hidden_layer(hidden_layers)
+                        .with_output_layer(2)
+                        .build_network()
+                        .unwrap()
+                }, 
+                traning_handeler: None
+            };
+            wrapper.initalize_traning_handeler();
+            wrapper
+        }
     }
 
     #[wasm_bindgen]
@@ -75,8 +87,12 @@ impl NeuralWrapper{
         return vec;
     }
 
+    // Code just for proof of wasm's functionality. To be removed!
     #[wasm_bindgen]
     pub fn get(&self) -> f64{
         self.neural_network.output_layer.as_ref().unwrap().neurons.get(0).unwrap().bias.unwrap() as f64
     }
+
+
+    //https://www.makeuseof.com/json-serialization-and-deserialization-rust/
 }

@@ -75,9 +75,10 @@
 
       <div class = "visualisation-left-mid">
 
-        <section class = "v" id = "vis">
-          
+        <section class = "v">
+          <svg id="vis" height=400 width=450></svg>
         </section>
+      
         
       </div>
       <section class = "visualisation-left-left">
@@ -93,7 +94,7 @@
 
         <script>
 
-          
+          /*
           var margin = {top: 20, right:10, bottom: 30, left: 50}
           var height = 200
           var width = 450
@@ -103,6 +104,8 @@
           .attr("height", height + margin.top + margin.bottom)
                     .append("g")
                     .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          */
           /*
           var x = d3.scaleLinear()
                   .domain([0.0, 1.0])
@@ -142,91 +145,112 @@
 
 
   <script>
-    
-    var margin = {top: 20, right:10, bottom: 30, left: 50}
-    var width = 400;
-    var height = 400; 
 
-    var svg = d3.select("#vis")//.append("svg").attr("width", width).attr("height", height)
-    //var svg = d3.select("#data_area")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-              .append("g")
-              .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-              
-    
-    
-    // Retrived from: https://wizardace.com/d3-heatmap/
-    var n = 100;
-    var matrix = new Array(n);
-    for(var i = 0; i < n; i++) {
-      matrix[i] = new Array(n);
-      for(var j = 0; j < n; j++) {
-        matrix[i][j] = Math.random();
-      }
+    // TODO: 
+    // Implement buttons
+    // Use sessionStorage to be able to store a neural network during session, crate for this: https://docs.rs/gloo-storage/0.3.0/gloo_storage/struct.SessionStorage.html
+    //  - serialize rust neural network?
+
+    function remove_contents_graph(){
+      var svg = d3.select("#vis").select("svg")
+          svg.selectAll("*").remove();
     }
-  
-    // Retrived from: https://wizardace.com/d3-heatmap/
-    var svg = d3.select("#vis").append("svg").attr("width", width).attr("height", height);
-    g = svg.append("g").attr("transform", "translate(" + 0 + "," + 0 + ")");
-  
-    // Retrived from: https://wizardace.com/d3-heatmap/
-    var scale = d3.scaleBand().rangeRound([0, d3.min([width, height])]).domain(d3.range(n));
-  
-    var color = d3.scaleSequential(
-        function(t) { return d3.interpolate("white", "steelblue")(t); }
-      )
-      .domain([0, d3.max(matrix, function(row) { return d3.max(row) })]);
-  
-    // Retrived from: https://wizardace.com/d3-heatmap/
-    g.selectAll(".row")
-      .data(matrix)
-      .enter()
-      .append("g")
-      .attr("class", "row")
-      .attr("transform", function(d, i) { return "translate(0," + scale(i) + ")"; })
-      .selectAll(".cell")
-      .data(function(d) { return d })
-      .enter()
-      .append("rect")
-      .attr("class", "cell")
-      .attr("x", function(d, i) { return scale(i); })
-      .attr("width", scale.bandwidth())
-      .attr("height", scale.bandwidth())
-      .attr("opacity", 0.7)
-      .attr("fill", function(d) {return d3.rgb(d * 256 * Math.random(), 0, 0); });
 
 
-      // set x-axis scale
-      var x = d3.scaleLinear()
-              .domain([0.0, 1.0])
-              .range([0, width])
+    function set_visualization_graph(){
+      var margin = {top: 20, right:10, bottom: 30, left: 50}
+      var width = 400;
+      var height = 400; 
 
-      svg.append("g")
-      .attr("transform", "translate(0, " + height + ")").call(d3.axisBottom(x));
+      var svg = d3.select("#vis")//.append("svg").attr("width", width).attr("height", height)
+      //var svg = d3.select("#data_area")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-      var y = d3.scaleLinear()
-              .domain([0.0, 1.0])
-              .range([height, 0])
 
-      svg.append("g").call(d3.axisLeft(y));
-      var data = [ {x:0.10, y:0.20}, {x:0.40, y:0.90}, {x:0.80, y:0.50}, {x:0.85, y:0.54}, {x:0.78, y:0.49}, {x:0.83, y:0.46}, {x:0.9, y:0.9}]
+      // Retrived from: https://wizardace.com/d3-heatmap/
+      var n = 100;
+      var matrix = new Array(n);
+      for(var i = 0; i < n; i++) {
+        matrix[i] = new Array(n);
+        for(var j = 0; j < n; j++) {
+          matrix[i][j] = Math.random();
+        }
+      }
+    
+      // Retrived from: https://wizardace.com/d3-heatmap/
+      var svg = d3.select("#vis").append("svg").attr("width", width).attr("height", height);
+      g = svg.append("g").attr("transform", "translate(" + 0 + "," + 0 + ")");
+    
+      // Retrived from: https://wizardace.com/d3-heatmap/
+      var scale = d3.scaleBand().rangeRound([0, d3.min([width, height])]).domain(d3.range(n));
+    
+      // Retrived from: https://wizardace.com/d3-heatmap/
+      g.selectAll(".row")
+        .data(matrix)
+        .enter()
+        .append("g")
+        .attr("class", "row")
+        .attr("transform", function(d, i) { return "translate(0," + scale(i) + ")"; })
+        .selectAll(".cell")
+        .data(function(d) { return d })
+        .enter()
+        .append("rect")
+        .attr("class", "cell")
+        .attr("x", function(d, i) { return scale(i); })
+        .attr("width", scale.bandwidth())
+        .attr("height", scale.bandwidth())
+        .attr("opacity", 0.7)
+        .attr("fill", function(d) {return d3.rgb(d * 256 * Math.random(), 0, 0); });
 
-      // Add 3 dots for 0, 50 and 100%
-      svg
-      .selectAll("whatever")
-      .data(data)
-      .enter()
-      .append("circle")
-      .attr("cx", function(d){ return x(d.x) })
-      .attr("cy", function(d){ return y(d.y) })
-      .attr("r", 5)
-      .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
-      .style("stroke", "black")    // set the line colour
-      
-      
-      //.attr("fill", function(d,j) {return d3.rgb(matrix[d][j].r * 256, matrix[d][j].g * 256, matrix[d][j].b * 256); });
+
+        // set x-axis scale
+        var x = d3.scaleLinear()
+                .domain([0.0, 1.0])
+                .range([0, width])
+
+        svg.append("g")
+        .attr("transform", "translate(0, " + height + ")").call(d3.axisBottom(x));
+
+        var y = d3.scaleLinear()
+                .domain([0.0, 1.0])
+                .range([height, 0])
+
+        svg.append("g").call(d3.axisLeft(y));
+        var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
+        var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
+
+        
+        // Add 3 dots for 0, 50 and 100%
+        svg
+        .selectAll("whatever")
+        .data(data_type_a)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d){ return x(d.x) })
+        .attr("cy", function(d){ return y(d.y) })
+        .attr("r", 5)
+        .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
+        .style("stroke", "black")    // set the line colour
+
+        svg
+        .selectAll("whatever")
+        .data(data_type_b)
+        .enter()
+        .append("circle")
+        .attr("cx", function(d){ return x(d.x) })
+        .attr("cy", function(d){ return y(d.y) })
+        .attr("r", 5)
+        .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
+        .style("stroke", "black")    // set the line colour
+    } 
+
+
+    //set_visualization_graph()
+
     </script>
     <script type="module">
 
@@ -237,9 +261,196 @@
       import { default as wasm, NeuralWrapper, echo} from "/pkg/simple_neural_network_project.js";
 
       wasm().then((module) => {
+
+
+        //set_visualization_graph()
+
+        function create_neural_network(){
+          var neural_network_wrapper = new NeuralWrapper(4, "", "");
+          neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
+        
+          neural_network_wrapper.insert_traning_data([0.1, 0.2], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.3, 0.1], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
+
+          neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.62, 0.5], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.64, 0.59], [0.0, 1.0])
+
+          neural_network_wrapper.insert_traning_data([0.3, 0.3], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.35, 0.35], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.40, 0.3], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.4, 0.35], [1.0, 0.0])
+
+          var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
+          var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
+
+          //var neural_network_json = neural_network_wrapper.to_json()
+          sessionStorage.setItem("neural_network", echo(neural_network_wrapper));
+        }
+
+        
+        function update_visualization(){
+          
+          remove_contents_graph();
+
+
+
+          // For graphics
+          var margin = {top: 20, right:10, bottom: 30, left: 50}
+          var width = 400;
+          var height = 400; 
+
+          d3.select("#vis").append("svg").attr("width", width).attr("height", height);
+
+          var svg = d3.select("#vis")//.append("svg").attr("width", width).attr("height", height)
+          //var svg = d3.select("#data_area")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+          var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
+          var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
+
+          //var neural_network_wrapper = new NeuralWrapper(4, "", "");
+          var neural_network_wrapper = new NeuralWrapper(4, "json", sessionStorage.getItem("neural_network"));
+          neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
+        
+          neural_network_wrapper.insert_traning_data([0.1, 0.2], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.3, 0.1], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
+
+          neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.62, 0.5], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.64, 0.59], [0.0, 1.0])
+
+          neural_network_wrapper.insert_traning_data([0.3, 0.3], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.35, 0.35], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.40, 0.3], [1.0, 0.0])
+          neural_network_wrapper.insert_traning_data([0.4, 0.35], [1.0, 0.0])
+                
+          //var neural_network_wrapper = new NeuralWrapper(4, "json", sessionStorage.getItem("neural_network"));
+          //neural_network_wrapper.echo1(sessionStorage.getItem("neural_network"))
+
+          neural_network_wrapper.train(7000)
+          var out = neural_network_wrapper.get_output([0.3, 0.3])
+
+          alert(out.toString())
+
+        
+          // Retrived from: https://wizardace.com/d3-heatmap/
+          var n = 100;
+          var matrix = new Array(n);
+          for(var i = 0; i < n; i++) {
+            matrix[i] = new Array(n);
+            for(var j = 0; j < n; j++) {
+              //console.log([i / 100, j / 100].toString())
+              matrix[i][j] = neural_network_wrapper.get_output([j / n, 1.0 - i / n]);
+            }
+          }
+        
+          // Retrived from: https://wizardace.com/d3-heatmap/
+          var svg = d3.select("#vis").append("svg").attr("width", width).attr("height", height);
+          g = svg.append("g").attr("transform", "translate(" + 0 + "," + 0 + ")");
+        
+          // Retrived from: https://wizardace.com/d3-heatmap/
+          var scale = d3.scaleBand().rangeRound([0, d3.min([width, height])]).domain(d3.range(n));
+        
+          var color = d3.scaleSequential(
+              function(t) { return d3.interpolate("white", "steelblue")(t); }
+            )
+            .domain([0, d3.max(matrix, function(row) { return d3.max(row) })]);
+        
+          // Retrived from: https://wizardace.com/d3-heatmap/
+          g.selectAll(".row")
+            .data(matrix)
+            .enter()
+            .append("g")
+            .attr("class", "row")
+            .attr("transform", function(d, i) { return "translate(0," + scale(i) + ")"; })
+            .selectAll(".cell")
+            .data(function(d) { return d })
+            .enter()
+            .append("rect")
+            .attr("class", "cell")
+            .attr("x", function(d, i) { return scale(i); })
+            .attr("width", scale.bandwidth())
+            .attr("height", scale.bandwidth())
+            .attr("opacity", 0.7)
+            //.attr("fill", function(d) {return d3.rgb(d * 256 * Math.random(), 0, 0); });
+            .attr("fill", function(d) {
+              //console.log(d)
+
+              //return d3.rgb(d[1] * 256, d[0] * 256, 0); 
+              
+              if(d[0] < d[1]){
+                //return d3.rgb(d[0] * 256, d[0] * 256, d[0] * 256); 
+                return d3.rgb(160, 0, 0); 
+              } else {
+                return d3.rgb(0, 160, 0); 
+              }
+                
+              
+            
+            });
+
+
+            // set x-axis scale
+            var x = d3.scaleLinear()
+                    .domain([0.0, 1.0])
+                    .range([0, width])
+
+            svg.append("g")
+            .attr("transform", "translate(0, " + height + ")").call(d3.axisBottom(x));
+
+            var y = d3.scaleLinear()
+                    .domain([0.0, 1.0])
+                    .range([height, 0])
+
+            svg.append("g").call(d3.axisLeft(y));
+
+            // Add 3 dots for 0, 50 and 100%
+            svg
+            .selectAll("whatever")
+            .data(data_type_a)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d){ return x(d.x) })
+            .attr("cy", function(d){ return y(d.y) })
+            .attr("r", 5)
+            .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
+            .style("stroke", "black")    // set the line colour
+
+            svg
+            .selectAll("whatever")
+            .data(data_type_b)
+            .enter()
+            .append("circle")
+            .attr("cx", function(d){ return x(d.x) })
+            .attr("cy", function(d){ return y(d.y) })
+            .attr("r", 5)
+            .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
+            .style("stroke", "black")    // set the line colour
+          }
+
+
         // The boiler plate project comes with a `greet` function that calls:
         alert("Hello, hello-wasm!");
 
+        set_visualization_graph()
+        create_neural_network()
+        update_visualization()
+
+        //update_visualization()
+
+        /*
         var neural_network_wrapper = new NeuralWrapper(4);
         //var v = neural_network_wrapper.echo(100);
         //alert(v.toString());
@@ -267,19 +478,33 @@
         var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
         var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
         
-        neural_network_wrapper.train(100000)
+        neural_network_wrapper.train(7000)
         var out = neural_network_wrapper.get_output([0.3, 0.3])
 
         alert(out.toString())
 
 
+        var neural_network_json = neural_network_wrapper.to_json()
+
+        // store neural-network json format with sessionstorage
+        sessionStorage.setItem("neural_network", neural_network_json);
+        */
 
 
+        //remove_contents_graph()
+
+
+        //set_visualization_graph()
+
+
+        /*
         // For graphics
-
+        
         var margin = {top: 20, right:10, bottom: 30, left: 50}
         var width = 400;
         var height = 400; 
+
+        d3.select("#vis").append("svg").attr("width", width).attr("height", height);
 
         var svg = d3.select("#vis")//.append("svg").attr("width", width).attr("height", height)
         //var svg = d3.select("#data_area")
@@ -385,7 +610,10 @@
           .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
           .style("stroke", "black")    // set the line colour
 
+        */
+
         //alert(neural_network_wrapper.get().toString());
+        
 
         /*
         // fetch initial dataset
@@ -397,6 +625,7 @@
                 });
             });
         */
+       
 
         //greet();
         //console.log(greet("Hi henrik"));

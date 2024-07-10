@@ -8,15 +8,17 @@ use crate::layer::Layer;
 //use crate::backpropagation::{SquishFunction, TraningHandeler};
 use crate::neuron::{self, Neuron};
 use crate::util;
+use serde::{Serialize, Deserialize};
 
 
 
-#[derive(PartialEq, PartialOrd, Eq, Hash)]
+#[derive(PartialEq, PartialOrd, Eq, Hash, Serialize, Deserialize)]
 pub enum TypeNeuronValue{
     A, // A(L) with activation function 
     Z  // Z(L) without activation function
 }
 
+#[derive(Serialize, Deserialize)]
 pub struct NeuralNetwork{
     pub hidden_layers : Vec<Layer>,
     pub input_layer : Option<Layer>,
