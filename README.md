@@ -3,7 +3,7 @@
 
 ### How it loooks
 
-![alt text](https://github.com/HenrikSvensson04/Neural-Network-From-Scratch-Project/blob/main/demo_version.jpg?raw=true)
+![alt text](https://github.com/HenrikSvensson04/Neural-Network-From-Scratch-Project/blob/main/demo_version.png?raw=true)
 
 ### How to use 
 - run with command: 'cargo run' in your terminal
