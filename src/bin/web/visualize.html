@@ -5,7 +5,7 @@
 
     <meta charset="utf-8" />
 
-    <title>My Wasm Project</title>
+    <title>Neural Network From Scratch</title>
     <link rel="stylesheet" href="style.css" />
     <script src="https://d3js.org/d3.v7.min.js"></script>
 
@@ -32,6 +32,7 @@
     
         </section class = "control-1">
           <button class = "button" id = "btn"> Train network! </button>
+          <button class = "button" id = "btn_create"> Generate new! </button>
         </section>
 
         </section class = "control-2">
@@ -53,8 +54,6 @@
         <div class="custom-select">
           <select>
             <option value="0">Simple</option>
-            <option value="1">Complex</option>
-            <option value="2">Spiral</option>
           </select>
         </div>
         </section>
@@ -68,6 +67,16 @@
             <option value="0">1.0</option>
           </select>
         </div>
+
+        <p style = "font: 1.2rem Fira Sans, sans-serif;">
+          Stochastic gradient decent
+        </p>
+        <div class="custom-select">
+          <select>
+            <option value="0">No</option>
+          </select>
+        </div>
+
         </section>
 
 
@@ -220,7 +229,7 @@
                 .range([height, 0])
 
         svg.append("g").call(d3.axisLeft(y));
-        var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
+        var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}, {x:0.2, y:0.6}, {x:0.3, y:0.7}]
         var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
 
         
@@ -254,16 +263,26 @@
     </script>
     <script type="module">
 
+      //let worker = new Worker("/neural_network_computations.js", { type: 'module' });
 
+      /*
+      worker.addEventListener('message', event => {
+
+          console.log("Update ui");
+        });
+        */
+
+      
       // Importing WASM as a JS module requires us to call an init function provided by the default export.
       // This is planned to be changed in the future.
       //import { default as wasm, NeuralWrapper, insert_traning_data, get_something} from "/pkg/simple_neural_network_project.js";
       import { default as wasm, NeuralWrapper, echo, str} from "/pkg/simple_neural_network_project.js";
 
+      
       wasm().then((module) => {
         
 
-        document.getElementById("btn").innerText = str();
+        //document.getElementById("btn").innerText = str();
         alert(str());
 
         //set_visualization_graph()
@@ -277,6 +296,9 @@
           neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
           neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
           neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
+
+          neural_network_wrapper.insert_traning_data([0.2, 0.6], [0.0, 1.0])
+          neural_network_wrapper.insert_traning_data([0.3, 0.7], [0.0, 1.0])
 
           neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
           neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
@@ -292,7 +314,7 @@
           var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
 
 
-          alert(neural_network_wrapper.get_json_serialized());
+          //alert(neural_network_wrapper.get_json_serialized());
           //var neural_network_json = neural_network_wrapper.to_json()
           sessionStorage.setItem("neural_network", echo(neural_network_wrapper));
         }
@@ -318,7 +340,7 @@
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
 
-          var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
+          var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}, {x:0.2, y:0.6}, {x:0.3, y:0.7}]
           var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
 
           //var neural_network_wrapper = new NeuralWrapper(4, "", "");
@@ -347,7 +369,7 @@
           //var neural_network_wrapper = new NeuralWrapper(4, "json", sessionStorage.getItem("neural_network"));
           //neural_network_wrapper.echo1(sessionStorage.getItem("neural_network"))
 
-          neural_network_wrapper.train(500)
+          neural_network_wrapper.train(200)
           var out = neural_network_wrapper.get_output([0.3, 0.3])
 
           //alert(neural_network_wrapper.get_json_serialized());
@@ -399,8 +421,8 @@
             .attr("fill", function(d) {
               //console.log(d)
 
-              return d3.rgb(d[1] * 256, d[0] * 256, 0); 
-              
+              return d3.rgb(d[1] * 220, d[0] * 220, 0); 
+           
               /*
               if(d[0] < d[1]){
                 //return d3.rgb(d[0] * 256, d[0] * 256, d[0] * 256); 
@@ -409,7 +431,7 @@
                 return d3.rgb(0, 160, 0); 
               }
                 */
-                
+             
               
             
             });
@@ -452,6 +474,7 @@
             .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
             .style("stroke", "black")    // set the line colour
           }
+          
 
 
         // The boiler plate project comes with a `greet` function that calls:
@@ -463,6 +486,7 @@
         create_neural_network()
         update_visualization()
 
+        /*
         for (let i = 0; i < 1000; i++) {
           var millisecondsToWait = 50;
           setTimeout(function() {
@@ -470,17 +494,49 @@
             update_loop()
           }, millisecondsToWait);
         }
+        */
+
+        let nIntervId;
+
 
         function update_loop(){
 
-          var svg = d3.select("#vis")
-          svg.selectAll("*").remove();
+          if (!nIntervId) {
+            nIntervId = setInterval(update_v, 100);
+          } else {
+            clearInterval(nIntervId);
+            nIntervId = false;
+            document.getElementById("btn").innerText = "Train network";
+          }
 
-
-          update_visualization()
         }
 
+        function update_v(){
+          document.getElementById("btn").innerText = "Pause animation";
+          var svg = d3.select("#vis")
+          svg.selectAll("*").remove();
+          update_visualization();
+        }
+
+        
+
         document.getElementById("btn").addEventListener("click", update_loop);
+        document.getElementById("btn_create").addEventListener("click", function(){
+
+          // stop current animation, if there is an animation
+          clearInterval(nIntervId);
+          nIntervId = false;
+          document.getElementById("btn").innerText = "Train network";
+
+          // create new - reset network and visualization
+          create_neural_network();
+          var svg = d3.select("#vis")
+          svg.selectAll("*").remove();
+          update_visualization();
+        });
+
+        
+        
 
         //update_visualization()
 
