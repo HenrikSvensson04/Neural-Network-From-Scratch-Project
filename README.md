@@ -1,6 +1,10 @@
 # Neural-Network-From-Scratch-Project
 
 
+### How it loooks
+
+![alt text](https://github.com/HenrikSvensson04/Neural-Network-From-Scratch-Project/blob/main/demo_version.jpg?raw=true)
+
 ### How to use 
 - run with command: 'cargo run' in your terminal
 - Open your brower and open localhost:8080/visualize (should at least work on chrome)
@@ -27,5 +31,6 @@
 ## Resouces for learning the math behind neural networks
 - 3Blue1Brown
 - http://neuralnetworksanddeeplearning.com/
+
 
 
