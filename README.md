@@ -39,7 +39,7 @@
 - D3 library
 - Actix web (for a simple local webserver)
 
-## Resouces for learning the math behind neural networks
+## Resources for learning the math behind neural networks
 - 3Blue1Brown
 - http://neuralnetworksanddeeplearning.com/
 

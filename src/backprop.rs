@@ -57,8 +57,6 @@ pub fn calculate_cost(correct_output_values : &Vec<f32>, input_to_neural_network
     let neurons_values_map = neural_network.feedforward_to_map(input_to_neural_network).unwrap(); // layer -> neuron
 
     let cost = zip(correct_output_values, neural_network.output_layer.as_ref().unwrap().neurons.iter()).map(|(correct_output, neuron)|{
-        
-
         let inner =  neurons_values_map.get(&(neuron, TypeNeuronValue::A)).unwrap() - correct_output;
         return inner * inner;
     }).sum();
@@ -79,12 +77,12 @@ pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Gr
         layer.neurons.iter_mut().for_each(|neuron|{
             if let Some(gradient_for_neuron) = gradient.inside_map.get(neuron){
                 zip(neuron.weights.as_mut().unwrap(), &gradient_for_neuron.0).into_iter().for_each(|(weight, weight_derivative)|{
-                    *weight = (*weight) -  (1.0) * weight_derivative;
+                    *weight = (*weight) -  (1.0) * weight_derivative * 0.01;
                     //println!("Derivative weight: {}", weight_derivative);
                 }); 
 
                 if let Some(bias) = &mut neuron.bias{
-                    *bias = (*bias) -  (1.0) * gradient_for_neuron.1;
+                    *bias = (*bias) -  (1.0) * gradient_for_neuron.1 * 0.01;
                 }
             }
         });

@@ -1,6 +1,8 @@
 
 
 
+use std::iter::zip;
+
 use wasm_bindgen::prelude::*;
 use crate::{backprop, neural_network::NeuralNetwork, traning_handeler::TraningHandeler, neural_network::TypeNeuronValue};
 
@@ -24,14 +26,41 @@ pub struct NeuralWrapper{
 
 #[wasm_bindgen]
 impl NeuralWrapper{
-    #[wasm_bindgen(constructor)]
-    pub fn new(hidden_layers : u32, type_of_creation : String, json : String) -> NeuralWrapper{
+
+    #[wasm_bindgen(constructor)] 
+    pub fn new(structure_network : String, type_of_creation : String, json : String) -> NeuralWrapper{
 
         // create either object from json sessionStorage or from scratch
         if type_of_creation == "json"{
             let neural_wrapper: NeuralWrapper = serde_json::from_str(&json).unwrap();
             neural_wrapper
         } else {
+            let mut wrapper = NeuralWrapper{ 
+                neural_network: {
+                    let mut neural_network = NeuralNetwork::builder().with_input_layer(2);
+                    let mut i = 0;
+                    let length = structure_network.chars().count();
+                    for char in structure_network.chars(){
+                        match char {
+                            '-' => {
+
+                            },
+                            _=>{
+                                if i != 0 && i != length-1{
+                                    if char.to_string().parse::<u32>().is_ok(){
+                                        let number_of_neurons = char.to_string().parse::<u32>().unwrap();
+                                        neural_network = neural_network.with_hidden_layer(number_of_neurons);
+                                    }
+                                }    
+                            }
+                        }
+                        i += 1;
+                    }
+                    neural_network.with_output_layer(2).build_network().unwrap()
+                }, 
+                traning_handeler: None
+            };
+            /* 
             let mut wrapper = NeuralWrapper{ 
                 neural_network: {
                     NeuralNetwork::builder()
@@ -43,6 +72,7 @@ impl NeuralWrapper{
                 }, 
                 traning_handeler: None
             };
+            */
             wrapper.initalize_traning_handeler();
             wrapper
         }
@@ -98,6 +128,18 @@ impl NeuralWrapper{
         serde_json::to_string(&self).expect("Works!")
     }
 
-
-    //https://www.makeuseof.com/json-serialization-and-deserialization-rust/
+    #[wasm_bindgen]
+    pub fn get_cost(&self) -> f32{
+        let mut cost = -1.0;
+        if let Some(traning_handeler) = &self.traning_handeler{
+            cost = 0.0;
+            let mut iterations = 0;
+            zip(&traning_handeler.traning_data_input, &traning_handeler.traning_data_correct_output).for_each(|(inputs_vec, correct_outputs_vec)|{
+                iterations += 1;
+                cost += backprop::calculate_cost(&correct_outputs_vec, &inputs_vec, &self.neural_network);
+            });
+            cost = cost / iterations as f32;
+        }
+        return cost;
+    }
 }
