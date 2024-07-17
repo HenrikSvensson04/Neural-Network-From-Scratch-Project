@@ -1,18 +1,10 @@
 use std::{collections::HashMap, iter::zip, ops::Add};
 
 use crate::{layer::Layer, neural_network::NeuralNetwork, neural_network::TypeNeuronValue, neuron::Neuron, util};
-
-
-
 use nalgebra::{DMatrix, DVector};
 
 
-
 type PartialDerivatives = (Vec<f32>, f32);
-
-
-
-
 pub struct Gradient{
     pub inside_map : HashMap<Neuron, PartialDerivatives>
 }
@@ -28,7 +20,6 @@ impl Gradient{
 impl Add for Gradient {
     type Output = Gradient;
     fn add(self, mut other: Gradient) -> Gradient {
-
         let mut new_gradient : HashMap<Neuron, PartialDerivatives> = HashMap::new();
 
         self.inside_map.into_iter().for_each(|(neuorn, partial_derivative_self)|{
@@ -78,7 +69,6 @@ pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Gr
             if let Some(gradient_for_neuron) = gradient.inside_map.get(neuron){
                 zip(neuron.weights.as_mut().unwrap(), &gradient_for_neuron.0).into_iter().for_each(|(weight, weight_derivative)|{
                     *weight = (*weight) -  (1.0) * weight_derivative * learning_rate;
-                    //println!("Derivative weight: {}", weight_derivative);
                 }); 
 
                 if let Some(bias) = &mut neuron.bias{
@@ -93,21 +83,16 @@ pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Gr
 /// Returns a gradient 
 pub fn backpropagate(correct_output_values : &Vec<f32>, input_to_neural_network : &Vec<f32>, neural_network : &NeuralNetwork) -> Gradient{
 
-    let mut gradient : Gradient = Gradient::new(); //Where: type PartialDerivatives = (Vec<f32>, f32); Thus: (weights, bias)
-    
-    //let neurons_values_map = neural_network.calculate_values_of_all_neurons_map(input_to_neural_network).unwrap(); 
-    //let neurons_z_values_map = neural_network.calculate_values_of_all_neurons_z_value_map(input_to_neural_network).unwrap();
-
+    let mut gradient : Gradient = Gradient::new(); 
     let feedforward_values = neural_network.feedforward_to_map(input_to_neural_network).unwrap();
 
     // calculate partial derivatives between output layer and cost function
     let partials_output_layer : Vec<f32> = zip(neural_network.output_layer.as_ref().unwrap().neurons.iter(), correct_output_values.iter()).map(|(neuron, correct_output)|{
 
         let dCdA = 2.0 * (feedforward_values.get(&(neuron, TypeNeuronValue::A)).unwrap() - correct_output);
-
         let z = feedforward_values.get(&(neuron, TypeNeuronValue::Z)).unwrap();
-
         let dCdZ = dCdA * util::derivative_of_sigmoid(z.clone());
+
         // calculate dw and db from partial dC/dz(L) and add to gradient
         calculate_final_partials_to_gradient(dCdZ, &neuron, neural_network.output_layer.as_ref().unwrap(), &feedforward_values, &neural_network, &mut gradient);
         dCdZ
@@ -135,12 +120,6 @@ pub fn backpropagate(correct_output_values : &Vec<f32>, input_to_neural_network 
                 // Calculate partial: where z(L)(n) / z(L-1)(k) = weight (from layer L to L-1)
                 // Where: z(L)(n) / z(L-1)(k) = (z(L)(n) / a(L-1)(k)) * (a(L-1)(k) / z(L-1)(k))
                 let z_lower_value = feedforward_values.get(&(neuron, TypeNeuronValue::Z)).unwrap().clone(); // Thus value of: z(L-1)(k)
-
-                //println!("{:?} and: row: {}", neuron_in_previous_layer.weights, row);
-                //println!("");
-                //println!("row: {}, column: {}", row, col);
-                //println!("Rows in matrix: {}, Columns in matrix: {}", matrix.nrows(), matrix.ncols());
-                //println!("{:?}", matrix);
                 let dz_upper_dz_lower = neuron_in_previous_layer.weights.as_ref().unwrap().get(row).unwrap().clone() * util::derivative_of_sigmoid(z_lower_value);
                 matrix[(row, col)] = dz_upper_dz_lower;
                 col += 1;
@@ -153,7 +132,6 @@ pub fn backpropagate(correct_output_values : &Vec<f32>, input_to_neural_network 
 
         // add to gradient
         zip(partials.iter(), hidden_layer.neurons.iter()).for_each(|(partial, neuron)|{
-
             // calculate dw and db from partial dC/dz(L) and add to gradient
             calculate_final_partials_to_gradient(partial.clone(), &neuron, &hidden_layer, &feedforward_values, &neural_network, &mut gradient)
         });
@@ -163,7 +141,6 @@ pub fn backpropagate(correct_output_values : &Vec<f32>, input_to_neural_network 
 
         // switch previous layer to the current layer
         previous_layer = hidden_layer;
-
     });
 
     gradient
@@ -188,9 +165,3 @@ fn calculate_final_partials_to_gradient(partial : f32, current_neuron : &Neuron,
     // add to hashmap gradient
     gradient.inside_map.insert(current_neuron.clone(), (weights_derivatives_vec, dCdB));
 }
-
-
-    
-
-
-

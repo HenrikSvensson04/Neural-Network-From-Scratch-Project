@@ -56,13 +56,10 @@ impl Neuron{
         self.weights = Some(
             (0..number_of_neurons_previous_layer as usize).map(|redundant_i|{
                 let rand_weight = (thread_rng().gen::<f32>() - 0.5) * 2.0;  /*Now between -1 and 1 */ //* 100.0; // between -100 and 100
-                //println!("weight; {}", rand_weight);
                 return rand_weight as f32
             }).collect()
         );
-
         // create random bias
         self.bias = Some(((thread_rng().gen::<f32>() - 0.5) * 2.0) as f32);
-
     }
 }

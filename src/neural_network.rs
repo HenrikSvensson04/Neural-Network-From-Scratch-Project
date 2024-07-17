@@ -68,8 +68,6 @@ impl NeuralNetwork{
         return None;
     }
 
-
-
     // To be removed!
     /// Calculate values of all neurons into a vec<vec<f32>>, with format: layer -> neuron -> value, this includes both hidden layers and output layer and input layer
     pub fn calculate_values_of_all_neurons(&self, input : &Vec<f32>) -> Option<Vec<Vec<f32>>>{
@@ -110,9 +108,6 @@ impl NeuralNetwork{
                     
                     layer_values.push(neuron_value);
                 }
-
-                //println!("\n");
-
                 return_vec.push(layer_values);
             }
 

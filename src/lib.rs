@@ -18,15 +18,7 @@ use wasm_bindgen::prelude::*;
 use serde::{Serialize, Deserialize};
 use serde_json::*;
 
-
-//mod Layer;
-//mod Neuron;
-//mod Layer;
-
-//use backpropagation::{SquishFunction, TraningHandeler};
-
 use crate::neural_network::NeuralNetwork;
-
 
 #[wasm_bindgen]
 pub fn str() -> String{
@@ -43,8 +35,6 @@ pub fn serialize_neural_wrapper(wrapper : &NeuralWrapper) -> String{
     serde_json::to_string(&wrapper).unwrap()
 }
 
-
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -58,7 +48,6 @@ mod tests {
             .with_output_layer(1)
             .build_network().unwrap();
 
-            //println!("{:?}", nw.hidden_layers.get_mut(0).unwrap().neurons.len());
             // check that hidden layers has correct number neurons
             assert_eq!(nw.hidden_layers.get_mut(0).unwrap().neurons.len(), 5);
             assert_eq!(nw.hidden_layers.get_mut(1).unwrap().neurons.len(), 3);
@@ -73,7 +62,36 @@ mod tests {
     }
 
 
+    #[test]
+    fn sigmoid(){
+        assert_eq!(util::sigmoid(2.0), 0.880797);
+        assert_eq!(util::sigmoid(0.0), 0.5);
 
+        assert_eq!(util::derivative_of_sigmoid(10.0), 0.00004539582);
+
+        let structure_network = String::from("2-2-2-2-334-2");
+        let parts = structure_network.split("-");
+
+        let mut i = 0;
+        let length = parts.clone().count();
+        for part in parts{
+            println!("{}", part);
+            if i != 0 && i != length-1{
+                if part.parse::<u32>().is_ok(){
+                    let number_of_neurons = part.parse::<u32>().unwrap();
+                    println!("{}", number_of_neurons);
+                }
+                
+            } 
+            i += 1;
+        }
+
+
+        assert_eq!(10, 5);
+    }
+
+
+    // These older tests are deprecated
 
     /* 
     #[test]
@@ -319,35 +337,6 @@ mod tests {
 
     */
 
-
-
-    #[test]
-    fn sigmoid(){
-        assert_eq!(util::sigmoid(2.0), 0.880797);
-        assert_eq!(util::sigmoid(0.0), 0.5);
-
-        assert_eq!(util::derivative_of_sigmoid(10.0), 0.00004539582);
-
-        let structure_network = String::from("2-2-2-2-334-2");
-        let parts = structure_network.split("-");
-
-        let mut i = 0;
-        let length = parts.clone().count();
-        for part in parts{
-            println!("{}", part);
-            if i != 0 && i != length-1{
-                if part.parse::<u32>().is_ok(){
-                    let number_of_neurons = part.parse::<u32>().unwrap();
-                    println!("{}", number_of_neurons);
-                }
-                
-            } 
-            i += 1;
-        }
-
-
-        assert_eq!(10, 5);
-    }
 
 }
 

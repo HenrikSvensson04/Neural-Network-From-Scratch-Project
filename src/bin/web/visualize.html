@@ -225,7 +225,7 @@
         document.getElementById("learning-rate").value = "0.05";
 
         // this must happen before anything else
-        function load_datasets(){
+        function initalize_everything(){
           fetch('/dataset_1.csv').then(response => response.text())
           .then(csvText => {
             sessionStorage.setItem("dataset_1.csv", csvText);
@@ -235,8 +235,41 @@
           fetch('/dataset_2.csv').then(response => response.text())
           .then(csvText => {
             sessionStorage.setItem("dataset_2.csv", csvText);
-          });
+
+            return 10.0;
+            
+          }).then( h =>{
+            try{
+              set_visualization_graph();
+              create_neural_network();
+              // set up visualization without updating neural network
+              update_visualization(false);
+            } catch(Error){
+              alert("Update or refresh page - Datasets were not loaded in time!")
+            }
+            
+          }
+            
+          );
         };
+
+
+        function load_datasets(){
+          fetch('/dataset_1.csv').then(response => response.text())
+          .then(csvText => {
+            sessionStorage.setItem("dataset_1.csv", csvText);
+
+
+            
+          });
+
+          fetch('/dataset_2.csv').then(response => response.text())
+              .then(csvText => {
+                sessionStorage.setItem("dataset_2.csv", csvText);
+          });
+        }
+        
+
         //alert(str());
 
         function create_neural_network(){
@@ -269,7 +302,7 @@
               }
             });
 
-          alert(neural_network_wrapper.get_json_serialized());
+          //alert(neural_network_wrapper.get_json_serialized());
           sessionStorage.setItem("neural_network", echo(neural_network_wrapper));
         }
 
@@ -427,12 +460,16 @@
             console.log(data_type_a);
           }
         
-        // startup procedure
-        load_datasets();
-        set_visualization_graph();
-        create_neural_network();
+
+        //load_datasets(); // this must happen before anything else
+
+        initalize_everything();
+        //alert("Welcome!")
+        //set_visualization_graph();
+        //create_neural_network();
         // set up visualization without updating neural network
-        update_visualization(false);
+        //update_visualization(false);
+        
 
         // for update loop
         let nIntervId;

@@ -38,8 +38,9 @@ impl NeuralWrapper{
             let mut wrapper = NeuralWrapper{ 
                 neural_network: {
                     let mut neural_network = NeuralNetwork::builder().with_input_layer(2);
-                    let parts = structure_network.split("-");
 
+                    // generate hidden layers from string input
+                    let parts = structure_network.split("-");
                     let mut i = 0;
                     let length = parts.clone().count();
                     for part in parts{
@@ -51,6 +52,7 @@ impl NeuralWrapper{
                         } 
                         i += 1;
                     }
+                    // add output-layer
                     neural_network.with_output_layer(2).build_network().unwrap()
                 }, 
                 traning_handeler: None

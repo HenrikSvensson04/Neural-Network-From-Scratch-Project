@@ -36,29 +36,29 @@ async fn main() -> std::io::Result<()> {
 
 
 async fn html() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/src/bin/web/visualize.html").await.unwrap()
+    NamedFile::open_async("./src/bin/web/visualize.html").await.unwrap()
 }
 
 async fn style() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/src/bin/web/style.css").await.unwrap()
+    NamedFile::open_async("./src/bin/web/style.css").await.unwrap()
 }
 
 async fn dataset_1() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/src/bin/web/dataset_1.csv").await.unwrap()
+    NamedFile::open_async("./src/bin/web/dataset_1.csv").await.unwrap()
 }
 
 async fn dataset_2() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/src/bin/web/dataset_2.csv").await.unwrap()
+    NamedFile::open_async("./src/bin/web/dataset_2.csv").await.unwrap()
 }
 
 async fn csv() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/src/bin/web/jquery-csv.js").await.unwrap()
+    NamedFile::open_async("./src/bin/web/jquery-csv.js").await.unwrap()
 }
 
 async fn js() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/pkg/simple_neural_network_project.js").await.unwrap()
+    NamedFile::open_async("./pkg/simple_neural_network_project.js").await.unwrap()
 }
 
 async fn bg() -> impl Responder {
-    NamedFile::open_async("C:/Users/Henrik/Repos/Simple-Neural-Network-Project/pkg/simple_neural_network_project_bg.wasm").await.unwrap()
+    NamedFile::open_async("./pkg/simple_neural_network_project_bg.wasm").await.unwrap()
 }
