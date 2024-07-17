@@ -1,17 +1,6 @@
 # Neural-Network-From-Scratch-Project
 
 
-
-## This is only the demo version, for complete version I shall:
-- Make it possible to change number of hidden layers in the visualization. The underlying code in rust already supports this.
-- Clean the code and add comments
-- Add more datasets
-- Improve visualization colors
-- Implement stochatic gradient decent
-- Make it possible to change learning rate in the visualization. The underlying code in rust already supports this.
-- Add different activation functions
-- And more ..
-
 ## How it loooks
 
 ![alt text](https://github.com/HenrikSvensson04/Neural-Network-From-Scratch-Project/blob/main/demo_version.png?raw=true)
@@ -19,6 +8,7 @@
 ## How to use 
 - run with command: 'cargo run' in your terminal
 - Open your brower and open localhost:8080/visualize (should at least work on chrome)
+- Note: Might be neccecary to reload page, due to a bug! Brower might need to cache certain files.
 
 ## What the project includes
 - Neural network implementation from scratch
