@@ -5,8 +5,6 @@
 pub mod neural_network;
 mod neuron;
 mod layer;
-pub mod backpropagation;
-pub mod back;
 mod util;
 pub mod backprop;
 pub mod traning_handeler;
@@ -73,6 +71,8 @@ mod tests {
             assert_eq!(number_of_connections_per_neuron_second_hidden_layer, 5);
             assert_eq!(number_of_connections_per_neuron_output_layer, 3);
     }
+
+
 
 
     /* 
@@ -327,6 +327,26 @@ mod tests {
         assert_eq!(util::sigmoid(0.0), 0.5);
 
         assert_eq!(util::derivative_of_sigmoid(10.0), 0.00004539582);
+
+        let structure_network = String::from("2-2-2-2-334-2");
+        let parts = structure_network.split("-");
+
+        let mut i = 0;
+        let length = parts.clone().count();
+        for part in parts{
+            println!("{}", part);
+            if i != 0 && i != length-1{
+                if part.parse::<u32>().is_ok(){
+                    let number_of_neurons = part.parse::<u32>().unwrap();
+                    println!("{}", number_of_neurons);
+                }
+                
+            } 
+            i += 1;
+        }
+
+
+        assert_eq!(10, 5);
     }
 
 }

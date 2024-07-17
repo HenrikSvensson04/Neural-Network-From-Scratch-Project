@@ -66,7 +66,7 @@ pub fn calculate_cost(correct_output_values : &Vec<f32>, input_to_neural_network
 
 
 /// Update a neural network with gradient
-pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Gradient){
+pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Gradient, learning_rate : &f32){
 
     // Updates the neural network with the derivatives
     // Note: The cost function reduces if we move in the direction of the negative gradient
@@ -77,12 +77,12 @@ pub fn update_neural_network(neural_network : &mut NeuralNetwork, gradient : &Gr
         layer.neurons.iter_mut().for_each(|neuron|{
             if let Some(gradient_for_neuron) = gradient.inside_map.get(neuron){
                 zip(neuron.weights.as_mut().unwrap(), &gradient_for_neuron.0).into_iter().for_each(|(weight, weight_derivative)|{
-                    *weight = (*weight) -  (1.0) * weight_derivative * 0.01;
+                    *weight = (*weight) -  (1.0) * weight_derivative * learning_rate;
                     //println!("Derivative weight: {}", weight_derivative);
                 }); 
 
                 if let Some(bias) = &mut neuron.bias{
-                    *bias = (*bias) -  (1.0) * gradient_for_neuron.1 * 0.01;
+                    *bias = (*bias) -  (1.0) * gradient_for_neuron.1 * learning_rate;
                 }
             }
         });

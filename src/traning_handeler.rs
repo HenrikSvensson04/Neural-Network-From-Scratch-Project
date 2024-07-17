@@ -9,18 +9,20 @@ pub struct TraningHandeler{
     pub traning_data_input : Vec<Vec<f32>>,
     pub traning_data_correct_output : Vec<Vec<f32>>,
     traning_data_num_neurons_input : u32,
-    traning_data_num_neurons_output : u32
+    traning_data_num_neurons_output : u32,
+    pub learning_rate : f32
 }
 
 impl TraningHandeler{
     
     /// Select the neural network that you wish to associate with this traningHandeler
-    pub fn new(neural_network : &NeuralNetwork) -> TraningHandeler{
+    pub fn new(neural_network : &NeuralNetwork, learning_rate : f32) -> TraningHandeler{
         TraningHandeler{
             traning_data_input : Vec::new(),
             traning_data_correct_output : Vec::new(),
             traning_data_num_neurons_input : neural_network.input_layer.as_ref().unwrap().get_number_of_neurons() as u32,
-            traning_data_num_neurons_output : neural_network.output_layer.as_ref().unwrap().get_number_of_neurons() as u32
+            traning_data_num_neurons_output : neural_network.output_layer.as_ref().unwrap().get_number_of_neurons() as u32,
+            learning_rate : learning_rate
         }
     }
 
@@ -47,7 +49,7 @@ impl TraningHandeler{
         for _i in 0..number_of_epochs {
             let mut gradient : Option<Gradient> = None;
             zip(&self.traning_data_input, &self.traning_data_correct_output).for_each(|(input, correct_output)|{
-
+                
                 match gradient.is_some(){
                     true => {
                         let mut redundant_swap : Option<Gradient> = None;
@@ -64,8 +66,8 @@ impl TraningHandeler{
             });
 
             if let Some(gradient_unwrapped) = gradient{
-                // update neural network
-                backprop::update_neural_network(neural_network, &gradient_unwrapped);
+                // update neural network with calculated gradient -> minimize cost function of network
+                backprop::update_neural_network(neural_network, &gradient_unwrapped, &self.learning_rate);
             }
         }
     }

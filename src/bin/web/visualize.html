@@ -55,7 +55,7 @@
           Dataset:
         </p>
         <div class="custom-select">
-          <select>
+          <select id = "chosen_data_set">
             <option value="0">Scarse</option>
             <option value="1">Circle</option>
           </select>
@@ -67,8 +67,15 @@
           Learning rate
         </p>
         <div class="custom-select">
-          <select>
-            <option value="0">1.0</option>
+          <select id = "learning-rate">
+            <option value="1.0">1.0</option>
+            <option value="0.5">0.5</option>
+            <option value="0.1">0.1</option>
+            <option value="0.05">0.05</option>
+            <option value="0.03">0.03</option>
+            <option value="0.01">0.01</option>
+            <option value="0.005">0.005</option>
+            <option value="0.001">0.001</option>
           </select>
         </div>
 
@@ -106,7 +113,7 @@
           <input type="text" id="input_network_type" required minlength="3" maxlength="23" size="20"/>
 
           <script> 
-            document.getElementById("input_network_type").setAttribute('value','2-4-2');
+            document.getElementById("input_network_type").setAttribute('value','2-4-4-2');
           </script>
 
           <p style = "font: 0.69rem Fira Sans, sans-serif;">
@@ -126,53 +133,6 @@
 
       <section>
         <svg id="data_area" height=200 width=450></svg>
-
-        <script>
-          //https://developer.mozilla.org/en-US/docs/Web/HTML/Element/input/text
-
-          /*
-          var margin = {top: 20, right:10, bottom: 30, left: 50}
-          var height = 200
-          var width = 450
-
-          var svg = d3.select("#data_area")
-          .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom)
-                    .append("g")
-                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-          */
-          /*
-          var x = d3.scaleLinear()
-                  .domain([0.0, 1.0])
-                  .range([0, width])
-
-          svg.append("g")
-          .attr("transform", "translate(0, " + height+ ")").call(d3.axisBottom(x));
-
-
-          var y = d3.scaleLinear()
-                  .domain([0.0, 1.0])
-                  .range([height, 0])
-          */
-          //svg.append("g").call(d3.axisLeft(y));
-
-          var data = [ {x:0.10, y:0.20}, {x:0.40, y:0.90}, {x:0.80, y:0.50} ]
-          
-          // Add 3 dots for 0, 50 and 100%
-          /*
-          svg
-              .selectAll("whatever")
-              .data(data)
-              .enter()
-              .append("circle")
-                .attr("cx", function(d){ return x(d.x) })
-                .attr("cy", function(d){ return y(d.y) })
-                .attr("r", 7)
-
-          */
-
-
         </script>
       </section>
     
@@ -181,13 +141,6 @@
 
 
   <script>
-
-
-    // TODO: 
-    // Implement buttons
-    // Use sessionStorage to be able to store a neural network during session, crate for this: https://docs.rs/gloo-storage/0.3.0/gloo_storage/struct.SessionStorage.html
-    //  - serialize rust neural network?
-
     function remove_contents_graph(){
       var svg = d3.select("#vis").select("svg")
           svg.selectAll("*").remove();
@@ -256,86 +209,9 @@
                 .range([height, 0])
 
         svg.append("g").call(d3.axisLeft(y));
-        //var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}, {x:0.2, y:0.6}, {x:0.3, y:0.7}]
-        //var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
-
-
-        /*
-        var data_type_a = [];
-        var data_type_b = [];
-
-        // Download dataset
-        fetch('/dataset_1.csv')
-          .then(response => response.text())
-          .then(csvText => {
-            // Parse CSV string into objects using PapaParse
-            const data = Papa.parse(csvText, {
-              header: true, // Assumes the first row contains headers
-              dynamicTyping: true, // Converts numeric values from strings to numbers
-            }).data;
-
-            data.forEach((row, index) => {
-              //console.log(row.x);
-              if(row.correctOutClass == 1){
-                data_type_a.push({x:row.x, y:row.y});
-              } else {
-                //neural_network_wrapper.insert_traning_data([line.x, line.y], [0.0, 1.0])
-                data_type_b.push({x:row.x, y:row.y});
-              } 
-            });
-
-
-                // Add 3 dots for 0, 50 and 100%
-            svg
-            .selectAll("whatever")
-            .data(data_type_a)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d){ return x(d.x) })
-            .attr("cy", function(d){ return y(d.y) })
-            .attr("r", 5)
-            .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
-            .style("stroke", "black")    // set the line colour
-
-            svg
-            .selectAll("whatever")
-            .data(data_type_b)
-            .enter()
-            .append("circle")
-            .attr("cx", function(d){ return x(d.x) })
-            .attr("cy", function(d){ return y(d.y) })
-            .attr("r", 5)
-            .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
-            .style("stroke", "black")    // set the line colour
-
-            //console.log(data);
-            // You can now work with the `data` array which contains objects representing each row in the CSV
-            
-        })
-            */
-
-        
-        
     } 
-
-
-    //set_visualization_graph()
-
     </script>
     <script type="module">
-
-
-
-      //let worker = new Worker("/neural_network_computations.js", { type: 'module' });
-
-      /*
-      worker.addEventListener('message', event => {
-
-          console.log("Update ui");
-        });
-        */
-
-      
       // Importing WASM as a JS module requires us to call an init function provided by the default export.
       // This is planned to be changed in the future.
       //import { default as wasm, NeuralWrapper, insert_traning_data, get_something} from "/pkg/simple_neural_network_project.js";
@@ -346,79 +222,54 @@
       
       wasm().then((module) => {
         
+        document.getElementById("learning-rate").value = "0.05";
 
-
+        // this must happen before anything else
         function load_datasets(){
-          fetch('/dataset_2.csv').then(response => response.text())
+          fetch('/dataset_1.csv').then(response => response.text())
           .then(csvText => {
             sessionStorage.setItem("dataset_1.csv", csvText);
           });
+
+
+          fetch('/dataset_2.csv').then(response => response.text())
+          .then(csvText => {
+            sessionStorage.setItem("dataset_2.csv", csvText);
+          });
         };
-
-
-        //document.getElementById("btn").innerText = str();
-        alert(str());
-
-        //set_visualization_graph()
+        //alert(str());
 
         function create_neural_network(){
 
 
           var neural_network_wrapper = new NeuralWrapper(document.getElementById('input_network_type').value, "", "");
+          neural_network_wrapper.set_learning_rate(parseFloat(document.getElementById("learning-rate").value));
 
           // Download dataset to network
-              // Parse CSV string into objects using PapaParse
-          
-            const data = Papa.parse(sessionStorage.getItem("dataset_1.csv"), {
+          // Parse CSV string into objects using PapaParse
+
+            var data_csv = sessionStorage.getItem("dataset_2.csv");
+
+            var chosen_data = document.getElementById("chosen_data_set");
+            if (chosen_data.value == "1") {
+              data_csv = sessionStorage.getItem("dataset_1.csv");
+            }
+            const data = Papa.parse(data_csv, {
               header: true, // Assumes the first row contains headers
               dynamicTyping: true, // Converts numeric values from strings to numbers
             }).data;
 
             data.forEach((row, index) => {
-              //console.log(row);
-
               if (typeof row.x === 'number' && typeof row.y === 'number') {
                 if(row.correctOutClass == 1){
                   neural_network_wrapper.insert_traning_data([row.x, row.y], [1.0, 0.0]);
-                //neural_network_wrapper.insert_traning_data([Number(row.x), Number(row.y)], [1.0, 0.0]);
                 } else {
                   neural_network_wrapper.insert_traning_data([row.x, row.y], [0.0, 1.0]);
-                  //neural_network_wrapper.insert_traning_data([Number(row.x), Number(row.y)], [0.0, 1.0]);
                 } 
               }
-              //neural_network_wrapper.insert_traning_data([Number(row.x), Number(row.y)], [0.0, 1.0]);
             });
-          
-            //console.log(data);
-              // You can now work with the `data` array which contains objects representing each row in the CSV
-          
-          
-          /*
-          neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.1, 0.2], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.3, 0.1], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
-
-          neural_network_wrapper.insert_traning_data([0.2, 0.6], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.3, 0.7], [0.0, 1.0])
-
-          neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.62, 0.5], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.64, 0.59], [0.0, 1.0])
-
-          neural_network_wrapper.insert_traning_data([0.3, 0.3], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.35, 0.35], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.40, 0.3], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.4, 0.35], [1.0, 0.0])
-          */
-          
-
 
           alert(neural_network_wrapper.get_json_serialized());
-          //var neural_network_json = neural_network_wrapper.to_json()
           sessionStorage.setItem("neural_network", echo(neural_network_wrapper));
         }
 
@@ -441,33 +292,9 @@
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
           .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-          //var neural_network_wrapper = new NeuralWrapper(4, "", "");
+          
+          // get neural network
           var neural_network_wrapper = new NeuralWrapper("redundant_string!", "json", sessionStorage.getItem("neural_network"));
-
-          /*
-          neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
-        
-          neural_network_wrapper.insert_traning_data([0.1, 0.2], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.3, 0.1], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
-
-          neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.62, 0.5], [0.0, 1.0])
-          neural_network_wrapper.insert_traning_data([0.64, 0.59], [0.0, 1.0])
-
-          neural_network_wrapper.insert_traning_data([0.3, 0.3], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.35, 0.35], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.40, 0.3], [1.0, 0.0])
-          neural_network_wrapper.insert_traning_data([0.4, 0.35], [1.0, 0.0])
-          */
-                
-          //var neural_network_wrapper = new NeuralWrapper(4, "json", sessionStorage.getItem("neural_network"));
-          //neural_network_wrapper.echo1(sessionStorage.getItem("neural_network"))
-
           // whether or not we shall train network
           if(train){
             
@@ -487,11 +314,9 @@
           // update cost
           var str = "Cost: ";
           document.getElementById('cost').innerHTML = str.concat(neural_network_wrapper.get_cost());
-          
 
           // update svg
 
-          
           // Retrived from: https://wizardace.com/d3-heatmap/
           var n = 50;
           var matrix = new Array(n);
@@ -531,23 +356,8 @@
             .attr("width", scale.bandwidth())
             .attr("height", scale.bandwidth())
             .attr("opacity", 0.7)
-            //.attr("fill", function(d) {return d3.rgb(d * 256 * Math.random(), 0, 0); });
             .attr("fill", function(d) {
-              //console.log(d)
-
               return d3.rgb(d[1] * 220, d[0] * 220, 0); 
-           
-              /*
-              if(d[0] < d[1]){
-                //return d3.rgb(d[0] * 256, d[0] * 256, d[0] * 256); 
-                return d3.rgb(160, 0, 0); 
-              } else {
-                return d3.rgb(0, 160, 0); 
-              }
-                */
-             
-              
-            
             });
 
 
@@ -565,17 +375,18 @@
 
             svg.append("g").call(d3.axisLeft(y));
 
-
-            //var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}, {x:0.2, y:0.6}, {x:0.3, y:0.7}]
-            //var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
-
-            //var data_type_a;
-            //var data_type_b;
-
+            // add datapoints
             var data_type_a = [];
             var data_type_b = [];
 
-            const data = Papa.parse(sessionStorage.getItem("dataset_1.csv"), {
+            var data_csv = sessionStorage.getItem("dataset_2.csv");
+
+            var chosen_data = document.getElementById("chosen_data_set");
+            if (chosen_data.value == "1") { // circle dataset
+              data_csv = sessionStorage.getItem("dataset_1.csv");
+            }
+
+            const data = Papa.parse(data_csv, {
               header: true, // Assumes the first row contains headers
               dynamicTyping: true, // Converts numeric values from strings to numbers
             }).data;
@@ -583,17 +394,12 @@
             data.forEach((row, index) => {
               if (typeof row.x === 'number' && typeof row.y === 'number') {
                 if(row.correctOutClass == 0){
-                //console.log(row.x);
                 data_type_a.push({x:row.x, y:row.y});
               } else {
-                //neural_network_wrapper.insert_traning_data([line.x, line.y], [0.0, 1.0])
                 data_type_b.push({x:row.x, y:row.y});
               } 
-              }
-
-              
+              } 
             });
-
 
             // Add 3 dots for 0, 50 and 100%
             svg
@@ -619,35 +425,17 @@
             .style("stroke", "black")    // set the line colour
 
             console.log(data_type_a);
-
-            
-
-            
           }
-          
-
-
-        // The boiler plate project comes with a `greet` function that calls:
-        //alert("Hello, hello-wasm!");
-
-
+        
+        // startup procedure
         load_datasets();
         set_visualization_graph();
         create_neural_network();
+        // set up visualization without updating neural network
         update_visualization(false);
 
-        /*
-        for (let i = 0; i < 1000; i++) {
-          var millisecondsToWait = 50;
-          setTimeout(function() {
-            // Whatever you want to do after the wait
-            update_loop()
-          }, millisecondsToWait);
-        }
-        */
-
+        // for update loop
         let nIntervId;
-
 
         function update_loop(){
 
@@ -661,6 +449,7 @@
 
         }
 
+        // update viusalization
         function update_v(){
           document.getElementById("btn").innerText = "Pause animation";
           var svg = d3.select("#vis")
@@ -668,8 +457,15 @@
           update_visualization(true);
         }
 
-        
+        // update learning rate
+        document.getElementById("learning-rate").addEventListener("change",  function(){
+          var neural_network_wrapper = new NeuralWrapper("redundant_string!", "json", sessionStorage.getItem("neural_network"));
+          neural_network_wrapper.set_learning_rate(parseFloat(this.value));
+          sessionStorage.setItem("neural_network", echo(neural_network_wrapper));
+        });
 
+
+        // button listeners
         document.getElementById("btn").addEventListener("click", update_loop);
         document.getElementById("btn_create").addEventListener("click", function(){
 
@@ -682,198 +478,13 @@
           create_neural_network();
           var svg = d3.select("#vis")
           svg.selectAll("*").remove();
-          update_visualization(false);
+          update_visualization(false);  
 
-
+          // reset ephocs counter
           ephocs = 0;
           var str = "Epochs: ";
           document.getElementById('epochs').innerHTML = str.concat(ephocs.toString());
         });
-
-        
-        
-
-        //update_visualization()
-
-        /*
-        var neural_network_wrapper = new NeuralWrapper(4);
-        //var v = neural_network_wrapper.echo(100);
-        //alert(v.toString());
-
-        //alert(neural_network_wrapper.get_something().toString())
-
-        neural_network_wrapper.insert_traning_data([0.2, 0.9], [0.0, 1.0])
-        
-        neural_network_wrapper.insert_traning_data([0.1, 0.2], [0.0, 1.0])
-        neural_network_wrapper.insert_traning_data([0.3, 0.1], [0.0, 1.0])
-        neural_network_wrapper.insert_traning_data([0.95, 0.7], [1.0, 0.0])
-        neural_network_wrapper.insert_traning_data([0.9, 0.9], [1.0, 0.0])
-        neural_network_wrapper.insert_traning_data([0.8, 0.95], [1.0, 0.0])
-
-        neural_network_wrapper.insert_traning_data([0.6, 0.6], [0.0, 1.0])
-        neural_network_wrapper.insert_traning_data([0.65, 0.65], [0.0, 1.0])
-        neural_network_wrapper.insert_traning_data([0.62, 0.5], [0.0, 1.0])
-        neural_network_wrapper.insert_traning_data([0.64, 0.59], [0.0, 1.0])
-
-        neural_network_wrapper.insert_traning_data([0.3, 0.3], [1.0, 0.0])
-        neural_network_wrapper.insert_traning_data([0.35, 0.35], [1.0, 0.0])
-        neural_network_wrapper.insert_traning_data([0.40, 0.3], [1.0, 0.0])
-        neural_network_wrapper.insert_traning_data([0.4, 0.35], [1.0, 0.0])
-
-        var data_type_a = [{x:0.2, y:0.9}, {x:0.1, y:0.2}, {x:0.3, y:0.1}, {x:0.6, y:0.6}, {x:0.65, y:0.65}, {x:0.62, y:0.5}, {x:0.64, y:0.59}]
-        var data_type_b = [{x:0.95, y:0.7}, {x:0.9, y:0.9}, {x:0.8, y:0.95}, {x:0.3, y:0.3}, {x:0.35, y:0.35}, {x:0.4, y:0.3}, {x:0.4, y:0.35}]
-        
-        neural_network_wrapper.train(7000)
-        var out = neural_network_wrapper.get_output([0.3, 0.3])
-
-        alert(out.toString())
-
-
-        var neural_network_json = neural_network_wrapper.to_json()
-
-        // store neural-network json format with sessionstorage
-        sessionStorage.setItem("neural_network", neural_network_json);
-        */
-
-
-        //remove_contents_graph()
-
-
-        //set_visualization_graph()
-
-
-        /*
-        // For graphics
-        
-        var margin = {top: 20, right:10, bottom: 30, left: 50}
-        var width = 400;
-        var height = 400; 
-
-        d3.select("#vis").append("svg").attr("width", width).attr("height", height);
-
-        var svg = d3.select("#vis")//.append("svg").attr("width", width).attr("height", height)
-        //var svg = d3.select("#data_area")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-              
-    
-    
-        // Retrived from: https://wizardace.com/d3-heatmap/
-        var n = 100;
-        var matrix = new Array(n);
-        for(var i = 0; i < n; i++) {
-          matrix[i] = new Array(n);
-          for(var j = 0; j < n; j++) {
-            //console.log([i / 100, j / 100].toString())
-            matrix[i][j] = neural_network_wrapper.get_output([j / n, 1.0 - i / n]);
-          }
-        }
-      
-        // Retrived from: https://wizardace.com/d3-heatmap/
-        var svg = d3.select("#vis").append("svg").attr("width", width).attr("height", height);
-        g = svg.append("g").attr("transform", "translate(" + 0 + "," + 0 + ")");
-      
-        // Retrived from: https://wizardace.com/d3-heatmap/
-        var scale = d3.scaleBand().rangeRound([0, d3.min([width, height])]).domain(d3.range(n));
-      
-        var color = d3.scaleSequential(
-            function(t) { return d3.interpolate("white", "steelblue")(t); }
-          )
-          .domain([0, d3.max(matrix, function(row) { return d3.max(row) })]);
-      
-        // Retrived from: https://wizardace.com/d3-heatmap/
-        g.selectAll(".row")
-          .data(matrix)
-          .enter()
-          .append("g")
-          .attr("class", "row")
-          .attr("transform", function(d, i) { return "translate(0," + scale(i) + ")"; })
-          .selectAll(".cell")
-          .data(function(d) { return d })
-          .enter()
-          .append("rect")
-          .attr("class", "cell")
-          .attr("x", function(d, i) { return scale(i); })
-          .attr("width", scale.bandwidth())
-          .attr("height", scale.bandwidth())
-          .attr("opacity", 0.7)
-          //.attr("fill", function(d) {return d3.rgb(d * 256 * Math.random(), 0, 0); });
-          .attr("fill", function(d) {
-            console.log(d)
-
-            //return d3.rgb(d[1] * 256, d[0] * 256, 0); 
-            
-            if(d[0] < d[1]){
-              //return d3.rgb(d[0] * 256, d[0] * 256, d[0] * 256); 
-              return d3.rgb(160, 0, 0); 
-            } else {
-              return d3.rgb(0, 160, 0); 
-            }
-              
-            
-          
-          });
-
-
-          // set x-axis scale
-          var x = d3.scaleLinear()
-                  .domain([0.0, 1.0])
-                  .range([0, width])
-
-          svg.append("g")
-          .attr("transform", "translate(0, " + height + ")").call(d3.axisBottom(x));
-
-          var y = d3.scaleLinear()
-                  .domain([0.0, 1.0])
-                  .range([height, 0])
-
-          svg.append("g").call(d3.axisLeft(y));
-
-          // Add 3 dots for 0, 50 and 100%
-          svg
-          .selectAll("whatever")
-          .data(data_type_a)
-          .enter()
-          .append("circle")
-          .attr("cx", function(d){ return x(d.x) })
-          .attr("cy", function(d){ return y(d.y) })
-          .attr("r", 5)
-          .attr("fill", function(d) {return d3.rgb(256, 0, 0); })
-          .style("stroke", "black")    // set the line colour
-
-          svg
-          .selectAll("whatever")
-          .data(data_type_b)
-          .enter()
-          .append("circle")
-          .attr("cx", function(d){ return x(d.x) })
-          .attr("cy", function(d){ return y(d.y) })
-          .attr("r", 5)
-          .attr("fill", function(d) {return d3.rgb(0, 256, 0); })
-          .style("stroke", "black")    // set the line colour
-
-        */
-
-        //alert(neural_network_wrapper.get().toString());
-        
-
-        /*
-        // fetch initial dataset
-        fetch("/dataset_1.csv")
-            .then(reponse => response.json())
-            .then(json => {
-                json.array.forEach(element => {
-                    
-                });
-            });
-        */
-       
-
-        //greet();
-        //console.log(greet("Hi henrik"));
       });
     </script>
   </body>

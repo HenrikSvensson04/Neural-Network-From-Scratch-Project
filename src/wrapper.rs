@@ -38,41 +38,23 @@ impl NeuralWrapper{
             let mut wrapper = NeuralWrapper{ 
                 neural_network: {
                     let mut neural_network = NeuralNetwork::builder().with_input_layer(2);
-                    let mut i = 0;
-                    let length = structure_network.chars().count();
-                    for char in structure_network.chars(){
-                        match char {
-                            '-' => {
+                    let parts = structure_network.split("-");
 
-                            },
-                            _=>{
-                                if i != 0 && i != length-1{
-                                    if char.to_string().parse::<u32>().is_ok(){
-                                        let number_of_neurons = char.to_string().parse::<u32>().unwrap();
-                                        neural_network = neural_network.with_hidden_layer(number_of_neurons);
-                                    }
-                                }    
+                    let mut i = 0;
+                    let length = parts.clone().count();
+                    for part in parts{
+                        if i != 0 && i != length-1{
+                            if part.parse::<u32>().is_ok(){
+                                let number_of_neurons = part.parse::<u32>().unwrap();
+                                neural_network = neural_network.with_hidden_layer(number_of_neurons);
                             }
-                        }
+                        } 
                         i += 1;
                     }
                     neural_network.with_output_layer(2).build_network().unwrap()
                 }, 
                 traning_handeler: None
             };
-            /* 
-            let mut wrapper = NeuralWrapper{ 
-                neural_network: {
-                    NeuralNetwork::builder()
-                        .with_input_layer(2)
-                        .with_hidden_layer(hidden_layers)
-                        .with_output_layer(2)
-                        .build_network()
-                        .unwrap()
-                }, 
-                traning_handeler: None
-            };
-            */
             wrapper.initalize_traning_handeler();
             wrapper
         }
@@ -80,7 +62,7 @@ impl NeuralWrapper{
 
     #[wasm_bindgen]
     pub fn initalize_traning_handeler(&mut self){
-        self.traning_handeler = Some(TraningHandeler::new(&self.neural_network))
+        self.traning_handeler = Some(TraningHandeler::new(&self.neural_network, 1.0 /* Learning rate */))
     }
 
     #[wasm_bindgen]
@@ -98,7 +80,7 @@ impl NeuralWrapper{
         }
     }
 
-    /// TODO: Make this function safe somehow!
+    /// TODO: Make this function more safe!
     #[wasm_bindgen]
     pub fn get_output(&mut self, input : Vec<f32>) -> Vec<f32>{
 
@@ -141,5 +123,12 @@ impl NeuralWrapper{
             cost = cost / iterations as f32;
         }
         return cost;
+    }
+
+    #[wasm_bindgen]
+    pub fn set_learning_rate(&mut self, learning_rate : f32){
+        if let Some(traning_handeler) = &mut self.traning_handeler{
+            traning_handeler.learning_rate = learning_rate;
+        }
     }
 }
