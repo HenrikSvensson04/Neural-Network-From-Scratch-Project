@@ -12,13 +12,13 @@
 
 ## What the project includes
 - Neural network implementation from scratch
-- Simple visualization with the d3 library
+- Interactive classification visualization utilizing the D3 library
 
 
 ### Objectives of project
 - Learn the fundamentals of neural networks and the backpropagation algorithm
 - Apply my skills in multivariable calculus and linear algebra
-- Learn the basics of javascript and webprograming in general
+- Learn the basics of javascript and frontend development
 
 
 ### Languages and libraries used
